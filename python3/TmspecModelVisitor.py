@@ -31,7 +31,11 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitZone(self, ctx):
         zone_name = ctx.identifier().getText()
-        self.model.add_zone(zone_name)
+        try:
+            self.model.add_zone(zone_name)
+        except TmspecErrorDuplicateIdentifier as e:
+            e.context = ctx.identifier()
+            raise e
 
     def visitComponent(self, ctx):
         # self.visitChildren(ctx)
@@ -40,7 +44,10 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = self.visitAttributes(ctx.attributes())
         else:
             attributes = []
-        self.model.add_component(component_name, component_types, attributes)
+        try:
+            self.model.add_component(component_name, component_types, attributes)
+        except TmspecDuplicateIdentifier as e:
+            e.context = ctx.name_and_type()
 
     def visitNameAndType(self, ctx):
         self.visitChildren(ctx)
@@ -49,7 +56,13 @@ class TmspecModelVisitor(tmspecVisitor):
         return (name, types)
 
     def visitTyping(self, ctx):
-        types = [ self.model.get_identifier(c.getText()) for c in ctx.identifier() ]
+        types = []
+        for c in ctx.identifier():
+            try:
+                types.append(self.model.get_identifier(c.getText()))
+            except TmspecErrorUnknownIdentifier as e:
+                e.context = c
+                raise e
         return types
 
     def visitAttributes(self, ctx):
@@ -68,7 +81,11 @@ class TmspecModelVisitor(tmspecVisitor):
             return int(ctx.number().getText())
         if ctx.identifier():
             identifier = ctx.identifier().getText()
-            return self.model.get_identifier(identifier)
+            try:
+                return self.model.get_identifier(identifier)
+            except TmspecErrorUnknownIdentifier as e:
+                e.context = ctx.identifier()
+                raise e
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())
         if ctx.getText() == 'true':

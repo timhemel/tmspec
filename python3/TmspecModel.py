@@ -43,7 +43,7 @@ class TmspecModel:
         try:
             return self.identifiers[identifier]
         except KeyError:
-            raise TmspecErrorUnknownIdentifier
+            raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(identifier))
 
     def is_type(self, obj):
         return isinstance(obj, TmType)

@@ -37,6 +37,13 @@ class TmType(TmElementWithAttributes):
             return base_types
         return set([self.name])
 
+class TmFlow(TmElementWithAttributes):
+
+    def __init__(self, name, source, target, parents=[], attrs={}):
+        super(TmFlow, self).__init__(name, parents, attrs)
+        self.source = source
+        self.target = target
+
 class TmZone(TmElement):
     pass
 
@@ -67,6 +74,10 @@ class TmspecModel:
     def add_component(self, component):
         self.components[component.name] = component
         self.identifiers[component.name] = component
+
+    def add_flow(self, flow):
+        self.flows[flow.name] = flow
+        self.identifiers[flow.name] = flow
 
     def add_type(self, tm_type):
         # self.types[tm_type.name] = tm_type

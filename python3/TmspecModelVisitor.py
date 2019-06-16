@@ -57,8 +57,45 @@ class TmspecModelVisitor(tmspecVisitor):
         component = TmComponent(component_name, component_types, dict(attributes))
         self.model.add_component(component)
 
+    def _checkDataflowComponent(self, component, ctx):
+        if not component:
+            raise TmspecErrorUnknownIdentifier(
+                "unknown identifier: {}".format(ctx.getText()),
+                parse_context_to_input_context(ctx))
+        base_types = [t.get_base_types() for t in component.get_types()]
+        if 'dataflow' in base_types:
+            raise TmspecErrorInvalidType(
+                "element {} cannot be derived from dataflow"
+                .format(ctx.getText()),
+                parse_context_to_input_context(ctx))
+
     def visitFlow(self, ctx):
-        pass
+        name = ctx.identifier(0).getText()
+        if self.model.has_identifier(name):
+            raise TmspecErrorDuplicateIdentifier(
+                "identifier {} already in use.".format(name),
+                parse_context_to_input_context(ctx.identifier(0)))
+        if ctx.typing() is not None:
+            types = self.visitTyping(ctx.typing(), ['dataflow'])
+        else:
+            types = [self.model.get_identifier('dataflow')]
+        component1 = self.model.get_identifier(ctx.identifier(1).getText())
+        self._checkDataflowComponent(component1, ctx.identifier(1))
+        component2 = self.model.get_identifier(ctx.identifier(2).getText())
+        self._checkDataflowComponent(component2, ctx.identifier(2))
+        # determine arrow direction
+        if ctx.arrow().RARROW() is not None: # -->
+            source = component1
+            target = component2
+        else:
+            source = component2
+            target = component1
+        if ctx.attributes():
+            attributes = self.visitAttributes(ctx.attributes())
+        else:
+            attributes = []
+        flow = TmFlow(name, source, target, types, dict(attributes))
+        self.model.add_flow(flow)
 
     def visitNameAndType(self, ctx, type_restrictions):
         name = ctx.identifier().getText()

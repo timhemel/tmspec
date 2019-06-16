@@ -206,10 +206,23 @@ component database(datastore): ;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
         model = self.get_model(tree)
-        self.assertEqual(model.flows['login'].get_attr('pii'), True)
-        self.assertEqual(model.flows['login'].get_attr('https'), True)
-        self.assertEqual(model.flows['login'].source, model.components['webapp'])
-        self.assertEqual(model.flows['login'].target, model.components['database'])
+        self.assertEqual(model.flows['store_info'].get_attr('pii'), True)
+        self.assertEqual(model.flows['store_info'].get_attr('https'), True)
+        self.assertEqual(model.flows['store_info'].source, model.components['webapp'])
+        self.assertEqual(model.flows['store_info'].target, model.components['database'])
+
+    def test_flow_error_duplicate_identifier(self):
+        tree = self.get_parse_tree("""
+type encryptedflow(dataflow): https;
+
+component webapp(process): ;
+component database(datastore): ;
+
+flow webapp(encryptedflow): webapp --> database, pii;
+""")
+        with self.assertRaises(TmspecErrorDuplicateIdentifier):
+            model = self.get_model(tree)
+
 
     def test_flow_must_be_type_flow(self):
         tree = self.get_parse_tree("""

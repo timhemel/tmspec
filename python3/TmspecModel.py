@@ -6,8 +6,8 @@ class TmElement:
 
 class TmElementWithAttributes(TmElement):
 
-    def __init__(self, name, parents = [], attrs = {}):
-        self.name = name
+    def __init__(self, name, parents=[], attrs={}):
+        super(TmElementWithAttributes, self).__init__(name)
         self.parents = parents
         self.attr = attrs
 
@@ -35,8 +35,7 @@ class TmType(TmElementWithAttributes):
             for t in self.parents:
                 base_types.update(t.get_base_types())
             return base_types
-        else:
-            return set([self.name])
+        return set([self.name])
 
 class TmZone(TmElement):
     pass
@@ -47,10 +46,10 @@ class TmspecModel:
         self.zones = set([])
         self.components = {}
         self.identifiers = {
-                'process' : TmType('process'),
-                'datastore' : TmType('datastore'),
-                'dataflow' : TmType('dataflow'),
-                'externalentity' : TmType('externalentity'),
+            'process' : TmType('process'),
+            'datastore' : TmType('datastore'),
+            'dataflow' : TmType('dataflow'),
+            'externalentity' : TmType('externalentity'),
         }
         # self.types = {}
 
@@ -59,9 +58,6 @@ class TmspecModel:
 
     def get_identifier(self, identifier):
         return self.identifiers.get(identifier)
-
-    def is_type(self, obj):
-        return isinstance(obj, TmType)
 
     def add_zone(self, zone):
         self.zones.add(zone)
@@ -74,4 +70,3 @@ class TmspecModel:
     def add_type(self, tm_type):
         # self.types[tm_type.name] = tm_type
         self.identifiers[tm_type.name] = tm_type
-

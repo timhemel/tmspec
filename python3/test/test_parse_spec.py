@@ -1,9 +1,9 @@
 import unittest
+from antlr4 import *
+from antlr4.error.ErrorListener import ErrorListener
 
 import sys
 sys.path.insert(0, '..')
-from antlr4 import *
-from antlr4.error.ErrorListener import ErrorListener
 from tmspecLexer import *
 from tmspecParser import *
 from TmspecModelVisitor import *
@@ -48,7 +48,7 @@ component webapp(process): zone=outside, cookies;
 """)
         model = self.get_model(tree)
         outside_zone = list(model.zones)[0]
-        types = [ t.name for t in model.components['webapp'].get_types() ]
+        types = [t.name for t in model.components['webapp'].get_types()]
         self.assertEqual(types, ['process'])
         self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
         self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
@@ -81,10 +81,8 @@ zone outside;
 
 component webapp(process): zone=outside, cookies;
 """)
-        with self.assertRaises(TmspecErrorDuplicateIdentifier) as cm:
+        with self.assertRaises(TmspecErrorDuplicateIdentifier):
             model = self.get_model(tree)
-        # exc = cm.exception
-        # self.assertEqual(exc.msg, "bla")
 
     def test_error_undefined_zone(self):
         tree = self.get_parse_tree("""

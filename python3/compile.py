@@ -28,7 +28,7 @@ class CompilerApp:
             self.args.outfile.write('# ' + " ".join([str(a) for a in args]) + '\n')
     def run(self):
         self.args.outfile = sys.stdout
-        if self.args.sourcefile == None or self.args.sourcefile == '-':
+        if self.args.sourcefile is None or self.args.sourcefile == '-':
             inp = StdinStream()
         else:
             try:

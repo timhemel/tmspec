@@ -23,6 +23,7 @@ def unquote_string(s):
 class TmspecModelVisitor(tmspecVisitor):
 
     def __init__(self):
+        super(TmspecModelVisitor, self).__init__()
         self.model = TmspecModel()
 
     def visitStart(self, ctx):
@@ -32,7 +33,9 @@ class TmspecModelVisitor(tmspecVisitor):
     def visitZone(self, ctx):
         zone_name = ctx.identifier().getText()
         if self.model.has_identifier(zone_name):
-            raise TmspecErrorDuplicateIdentifier("identfier {} already in use.".format(zone_name), parse_context_to_error_context(ctx.identifier()))
+            raise TmspecErrorDuplicateIdentifier(
+                "identfier {} already in use.".format(zone_name),
+                parse_context_to_error_context(ctx.identifier()))
         zone = TmZone(zone_name)
         self.model.add_zone(zone)
 
@@ -57,7 +60,9 @@ class TmspecModelVisitor(tmspecVisitor):
     def visitNameAndType(self, ctx):
         name = ctx.identifier().getText()
         if self.model.has_identifier(name):
-            raise TmspecErrorDuplicateIdentifier("identifier {} already in use.".format(name), parse_context_to_error_context(ctx.identifier()))
+            raise TmspecErrorDuplicateIdentifier(
+                "identifier {} already in use.".format(name),
+                parse_context_to_error_context(ctx.identifier()))
         types = self.visitTyping(ctx.typing())
         return (name, types)
 
@@ -67,9 +72,13 @@ class TmspecModelVisitor(tmspecVisitor):
         for c in ctx.identifier():
             obj = self.model.get_identifier(c.getText())
             if not obj:
-                raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(c.getText()), parse_context_to_error_context(c))
+                raise TmspecErrorUnknownIdentifier(
+                    "unknown identifier: {}".format(c.getText()),
+                    parse_context_to_error_context(c))
             if not isinstance(obj, TmType):
-                raise TmspecErrorNotAType("{} is not a type".format(c.getText()), parse_context_to_error_context(c))
+                raise TmspecErrorNotAType(
+                    "{} is not a type".format(c.getText()),
+                    parse_context_to_error_context(c))
             if len(base_types) == 0:
                 base_types.update(obj.get_base_types())
                 base_type = list(base_types)[0]
@@ -77,14 +86,16 @@ class TmspecModelVisitor(tmspecVisitor):
                 base_type = list(base_types)[0]
                 base_types.update(obj.get_base_types())
             if len(base_types) > 1:
-                raise TmspecErrorConflictingTypes("type {} conflicts with {}".format(c.getText(), base_type), parse_context_to_error_context(c))
+                raise TmspecErrorConflictingTypes(
+                    "type {} conflicts with {}".format(c.getText(), base_type),
+                    parse_context_to_error_context(c))
             types.append(obj)
         return types
 
     def visitAttributes(self, ctx):
-        return [ self.visitAttribute(c) for c in ctx.attribute() ]
+        return [self.visitAttribute(c) for c in ctx.attribute()]
 
-    def visitAttribute(self,ctx):
+    def visitAttribute(self, ctx):
         attr_name = ctx.identifier().getText()
         if ctx.value():
             attr_value = self.visitValue(ctx.value())
@@ -99,7 +110,9 @@ class TmspecModelVisitor(tmspecVisitor):
             identifier = ctx.identifier().getText()
             obj = self.model.get_identifier(identifier)
             if obj is None:
-                raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(identifier), parse_context_to_error_context(ctx.identifier()))
+                raise TmspecErrorUnknownIdentifier(
+                    "unknown identifier: {}".format(identifier),
+                    parse_context_to_error_context(ctx.identifier()))
             return obj
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())

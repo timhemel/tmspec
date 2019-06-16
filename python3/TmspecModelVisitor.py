@@ -9,6 +9,21 @@ def unquote_string(s):
         if quoted:
             if s[i] == '\'' or s[i] == '\\':
                 r += s[i]
+            elif s[i] == 'b':
+                r += '\b'
+            elif s[i] == 'f':
+                r += '\f'
+            elif s[i] == 'n':
+                r += '\n'
+            elif s[i] == 'r':
+                r += '\r'
+            elif s[i] == 't':
+                r += '\t'
+            elif s[i] == 'u':
+                # read 4 chars
+                codepoint = int(s[i+1:i+5],16)
+                r += chr(codepoint)
+                i += 4
             else:
                 r += '\\' + s[i]
             quoted = False

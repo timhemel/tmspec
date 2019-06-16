@@ -38,7 +38,7 @@ LARROW: '<--';
 
 fragment DIGIT : [0-9] ;
 //fragment ESC : '\\\'' | '\\\\';
-fragment ESC : '\\' (['\\/bfnrt] | UNICODE);
+fragment ESC : '\\' (['\\bfnrt] | UNICODE);
 fragment UNICODE : 'u' HEX HEX HEX HEX;
 fragment HEX : [0-9a-fA-F] ;
 

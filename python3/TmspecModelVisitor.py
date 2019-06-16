@@ -51,10 +51,14 @@ class TmspecModelVisitor(tmspecVisitor):
     def visitComponent(self, ctx):
         component_name, component_types = self.visitNameAndType(ctx.name_and_type(), ['datastore', 'process', 'externalentity'])
         if ctx.attributes():
-            attributes = self.visitAttributes(ctx.attributes())
+            attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
-            attributes = []
-        component = TmComponent(component_name, component_types, dict(attributes))
+            attributes = {}
+        component = TmComponent(component_name, component_types, attributes)
+        try:
+            component.get_attr('zone')
+        except KeyError:
+            raise TmspecErrorComponentWithoutZone("no zone defined for component {}".format(component.name), ctx.attributes())
         self.model.add_component(component)
 
     def _checkDataflowComponent(self, component, ctx):

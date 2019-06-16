@@ -35,3 +35,5 @@ class TmspecErrorInvalidType(TmspecError):
 class TmspecErrorParseError(TmspecError):
     pass
 
+class TmspecErrorComponentWithoutZone(TmspecError):
+    pass

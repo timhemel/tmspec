@@ -20,7 +20,6 @@ def unquote_string(s):
             elif s[i] == 't':
                 r += '\t'
             elif s[i] == 'u':
-                # read 4 chars
                 codepoint = int(s[i+1:i+5],16)
                 r += chr(codepoint)
                 i += 4
@@ -84,7 +83,7 @@ class TmspecModelVisitor(tmspecVisitor):
         base_types = [t.get_base_types() for t in component.get_types()]
         if 'dataflow' in base_types:
             raise TmspecErrorInvalidType(
-                "element {} cannot be derived from dataflow"
+                "element {} is not a dataflow instance"
                 .format(ctx.getText()),
                 parse_context_to_input_context(ctx))
 

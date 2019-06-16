@@ -23,7 +23,7 @@ component webapp(process): zone=outside, cookies;
         self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
 
     def test_parse_attribute_types(self):
-        model = parseString("""
+        model = parseString(r"""
 version 0.0;
 zone outside;
 
@@ -37,7 +37,7 @@ component webapp(process): zone=outside, foo='bar\'s baz', https=true, lucky_num
         self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
 
     def test_parse_attribute_qstring_ends_with_backslash(self):
-        model = parseString("""
+        model = parseString(r"""
 version 0.0;
 zone inside;
 component webapp(process): foo='bar\'s baz\\', zone=inside;

@@ -158,5 +158,37 @@ yabbadabbadoo
 """)
             model = self.get_model(tree)
 
+    def test_conflicting_types_in_definition(self):
+        tree = self.get_parse_tree("""
+type encryptedflow(dataflow,process): https;
+
+component login(encryptedflow): ;
+""")
+        with self.assertRaises(TmspecErrorConflictingTypes):
+            model = self.get_model(tree)
+
+    def test_conflicting_types_with_derived_type_in_definition(self):
+        tree = self.get_parse_tree("""
+type webapp(process): ;
+type encryptedflow(dataflow,webapp): https;
+
+component login(encryptedflow): ;
+""")
+        with self.assertRaises(TmspecErrorConflictingTypes):
+            model = self.get_model(tree)
+
+
+    def test_component_has_derived_type_attributes(self):
+        tree = self.get_parse_tree("""
+type encryptedflow(dataflow): https;
+
+component login(encryptedflow): ;
+""")
+        model = self.get_model(tree)
+        self.assertEqual(model.components['login'].attr['https'], True)
+
+
+
+
 if __name__ == "__main__":
     unittest.main()

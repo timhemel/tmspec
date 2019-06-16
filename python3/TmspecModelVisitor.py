@@ -42,7 +42,6 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = self.visitAttributes(ctx.attributes())
         else:
             attributes = []
-        # TODO: check for type conflicts etc
         new_type = TmType(type_name, type_parents, dict(attributes))
         self.model.add_type(new_type)
 

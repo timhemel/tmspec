@@ -11,3 +11,5 @@ class TmspecErrorUnknownIdentifier(TmspecError):
 class TmspecErrorNotAType(TmspecError):
     pass
 
+class TmspecErrorConflictingTypes(TmspecError):
+    pass

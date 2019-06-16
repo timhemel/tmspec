@@ -4,14 +4,25 @@ class TmElement:
     def __init__(self, name):
         self.name = name
 
-class TmComponent:
+class TmComponent(TmElement):
     def __init__(self, name, types, attrs = {}):
         self.name = name
         self.types = types
         self.attr = attrs
 
 class TmType(TmElement):
-    pass
+    def __init__(self, name, parents = [], attrs = {}):
+        self.name = name
+        self.parents = parents
+        self.attrs = attrs
+    def get_base_types(self):
+        if self.parents:
+            base_types = set([])
+            for t in self.parents:
+                base_types.update(t.get_base_types())
+            return base_types
+        else:
+            return set([self.name])
 
 class TmZone(TmElement):
     pass
@@ -52,6 +63,11 @@ class TmspecModel:
         for t in component_types:
             if not self.is_type(t):
                 raise TmspecErrorNotAType("identifier {} is not a type.", t.name)
+        base_types = set([])
+        for t in component_types:
+            base_types.update(t.get_base_types())
+        if len(base_types) != 1:
+            raise TmspecErrorConflictingTypes("conflicting types")
         component = TmComponent(component_name, component_types, dict(attributes))
         self.components[component_name] = component
 

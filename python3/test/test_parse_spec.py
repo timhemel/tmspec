@@ -95,7 +95,7 @@ component webapp(process): zone=inside, cookies;
         tree = self.get_parse_tree("""
 component webapp(process, dataflow): ;
 """)
-        with self.assertRaises(TmspecError):
+        with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
 
     def test_conflicting_derived_types(self):
@@ -104,7 +104,7 @@ type encryptedflow(dataflow): https;
 
 component webapp(process, encryptedflow): ;
 """)
-        with self.assertRaises(TmspecError):
+        with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
 
     def test_component_identifier_already_used(self):

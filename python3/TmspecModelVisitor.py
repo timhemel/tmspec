@@ -36,7 +36,10 @@ class TmspecModelVisitor(tmspecVisitor):
     def visitComponent(self, ctx):
         # self.visitChildren(ctx)
         component_name, component_types = self.visitNameAndType(ctx.name_and_type())
-        attributes = self.visitAttributes(ctx.attributes())
+        if ctx.attributes():
+            attributes = self.visitAttributes(ctx.attributes())
+        else:
+            attributes = []
         self.model.add_component(component_name, component_types, attributes)
 
     def visitNameAndType(self, ctx):

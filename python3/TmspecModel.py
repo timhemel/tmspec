@@ -43,10 +43,7 @@ class TmspecModel:
         return identifier in self.identifiers
 
     def get_identifier(self, identifier):
-        try:
-            return self.identifiers[identifier]
-        except KeyError:
-            raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(identifier))
+        return self.identifiers.get(identifier)
 
     def is_type(self, obj):
         return isinstance(obj, TmType)
@@ -55,18 +52,7 @@ class TmspecModel:
         self.zones.add(zone)
         self.identifiers[zone.name] = zone
 
-    def add_component(self, component_name, component_types, attributes):
-        if component_name in self.identifiers:
-            raise TmspecErrorDuplicateIdentifier("identifier {} already in use."
-                            .format(component_name))
-        for t in component_types:
-            if not self.is_type(t):
-                raise TmspecErrorNotAType("identifier {} is not a type.", t.name)
-        base_types = set([])
-        for t in component_types:
-            base_types.update(t.get_base_types())
-        if len(base_types) != 1:
-            raise TmspecErrorConflictingTypes("conflicting types")
-        component = TmComponent(component_name, component_types, dict(attributes))
-        self.components[component_name] = component
+    def add_component(self, component):
+        self.components[component.name] = component
+        self.identifiers[component.name] = component
 

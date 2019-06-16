@@ -37,30 +37,39 @@ class TmspecModelVisitor(tmspecVisitor):
         self.model.add_zone(zone)
 
     def visitComponent(self, ctx):
-        # self.visitChildren(ctx)
         component_name, component_types = self.visitNameAndType(ctx.name_and_type())
         if ctx.attributes():
             attributes = self.visitAttributes(ctx.attributes())
         else:
             attributes = []
-        try:
-            self.model.add_component(component_name, component_types, attributes)
-        except TmspecErrorDuplicateIdentifier as e:
-            e.context = ctx.name_and_type()
+        component = TmComponent(component_name, component_types, dict(attributes))
+        self.model.add_component(component)
 
     def visitNameAndType(self, ctx):
         name = ctx.identifier().getText()
+        if self.model.has_identifier(name):
+            raise TmspecErrorDuplicateIdentifier("identifier {} already in use.".format(name), ctx.identifier())
         types = self.visitTyping(ctx.typing())
         return (name, types)
 
     def visitTyping(self, ctx):
         types = []
+        base_types = set([])
         for c in ctx.identifier():
-            try:
-                types.append(self.model.get_identifier(c.getText()))
-            except TmspecErrorUnknownIdentifier as e:
-                e.context = c
-                raise e
+            obj = self.model.get_identifier(c.getText())
+            if not obj:
+                raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(c.getText()), c)
+            if not isinstance(obj, TmType):
+                raise TmspecErrorNotAType("{} is not a type".format(c.getText()), c)
+            if len(base_types) == 0:
+                base_types.update(obj.get_base_types())
+                base_type = list(base_types)[0]
+            else:
+                base_type = list(base_types)[0]
+                base_types.update(obj.get_base_types())
+            if len(base_types) > 1:
+                raise TmspecErrorConflictingTypes("type {} conflicts with {}".format(c.getText(), base_type), c)
+            types.append(obj)
         return types
 
     def visitAttributes(self, ctx):

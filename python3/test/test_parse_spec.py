@@ -211,6 +211,20 @@ flow store_info(encryptedflow): webapp --> database, pii;
         self.assertEqual(model.flows['store_info'].source, model.components['webapp'])
         self.assertEqual(model.flows['store_info'].target, model.components['database'])
 
+    def test_flow_reverse(self):
+        tree = self.get_parse_tree("""
+type encryptedflow(dataflow): https;
+
+component webapp(process): ;
+component database(datastore): ;
+
+flow store_info(encryptedflow): webapp <-- database, pii;
+""")
+        model = self.get_model(tree)
+        self.assertEqual(model.flows['store_info'].source, model.components['database'])
+        self.assertEqual(model.flows['store_info'].target, model.components['webapp'])
+
+
     def test_flow_error_duplicate_identifier(self):
         tree = self.get_parse_tree("""
 type encryptedflow(dataflow): https;

@@ -17,7 +17,7 @@ class TestErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append((line, column, msg, e))
-        raise TmspecErrorParseError(msg, TmspecErrorContext(line, column))
+        raise TmspecErrorParseError(msg, TmspecInputContext(line, column))
 
 
 class TestParseSpec(unittest.TestCase):

@@ -1,12 +1,12 @@
 
-class TmspecErrorContext:
+class TmspecInputContext:
     def __init__(self, line, column):
         # TODO: filename?
         self.line = line
         self.column = column
 
 def parse_context_to_error_context(ctx):
-    return TmspecErrorContext(ctx.start.line, ctx.start.column)
+    return TmspecInputContext(ctx.start.line, ctx.start.column)
 
 class TmspecError(Exception):
     def __init__(self, msg, ctx):

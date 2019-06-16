@@ -33,6 +33,9 @@ class TmspecModel:
         self.identifiers[zone_name] = zone_name
 
     def add_component(self, component_name, component_types, attributes):
+        if component_name in self.identifiers:
+            raise TmspecErrorDuplicateIdentifier("identifier {} already in use."
+                            .format(component_name))
         component = TmComponent(component_name, component_types, dict(attributes))
         self.components[component_name] = component
 

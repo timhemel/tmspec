@@ -106,6 +106,23 @@ component webapp(process, encryptedflow): ;
         with self.assertRaises(TmspecError):
             model = self.get_model(tree)
 
+    def test_component_identifier_already_used(self):
+        tree = self.get_parse_tree("""
+zone outside;
+component outside(process): ;
+""")
+        with self.assertRaises(TmspecErrorDuplicateIdentifier):
+            model = self.get_model(tree)
+
+    def test_component_type_already_used(self):
+        tree = self.get_parse_tree("""
+zone outside;
+component webapp(process,outside): ;
+""")
+        with self.assertRaises(TmspecErrorDuplicateIdentifier):
+            model = self.get_model(tree)
+
+
 
 if __name__ == "__main__":
     unittest.main()

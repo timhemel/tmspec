@@ -3,7 +3,10 @@ class TmspecError(Exception):
     def __init__(self, msg, ctx):
         self.msg = msg
         self.context = ctx
-    pass
+    def get_line(self):
+        return self.context.start.line
+    def get_column(self):
+        return self.context.start.column
 
 class TmspecErrorDuplicateIdentifier(TmspecError):
     pass

@@ -137,7 +137,8 @@ component webapp(yabbadabbadoo): ;
         with self.assertRaises(TmspecErrorUnknownIdentifier) as cm:
             model = self.get_model(tree)
         exc = cm.exception
-        self.assertEqual(exc.context, 'abc')
+        self.assertEqual(exc.get_line(), 2)
+        self.assertEqual(exc.get_column(), 17)
 
 
 

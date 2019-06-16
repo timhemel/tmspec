@@ -46,7 +46,7 @@ class TmspecModelVisitor(tmspecVisitor):
         return (name, types)
 
     def visitTyping(self, ctx):
-        types = [ c.getText() for c in ctx.identifier() ]
+        types = [ self.model.get_identifier(c.getText()) for c in ctx.identifier() ]
         return types
 
     def visitAttributes(self, ctx):

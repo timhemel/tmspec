@@ -11,7 +11,12 @@ class TmspecModel:
     def __init__(self):
         self.zones = set([])
         self.components = {}
-        self.identifiers = {}
+        self.identifiers = {
+                'process' : 'process',
+                'datastore' : 'datastore',
+                'dataflow' : 'dataflow',
+                'externalentity' : 'externalentity',
+        }
 
     def get_identifier(self, identifier):
         try:

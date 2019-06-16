@@ -64,7 +64,8 @@ class TmspecModelVisitor(tmspecVisitor):
         if ctx.number():
             return int(ctx.number().getText())
         if ctx.identifier():
-            return ctx.identifier().getText()
+            identifier = ctx.identifier().getText()
+            return self.model.get_identifier(identifier)
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())
         if ctx.getText() == 'true':

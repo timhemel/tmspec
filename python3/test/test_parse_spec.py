@@ -7,11 +7,14 @@ from antlr4.error.ErrorListener import ErrorListener
 from tmspecLexer import *
 from tmspecParser import *
 from TmspecModelVisitor import *
+from TmspecError import *
 
 class TestErrorListener(ErrorListener):
+
     def __init__(self):
         super(TestErrorListener, self).__init__()
         self.errors = []
+
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append((line, column, msg, e))
 
@@ -66,8 +69,6 @@ component webapp(process): foo='bar\'s baz\\';
         model = self.get_model(tree)
         self.assertEqual(model.components['webapp'].attr['foo'], 'bar\'s baz\\')
 
-
-
     def test_error_on_duplicate_zone(self):
         tree = self.get_parse_tree("""
 zone outside;
@@ -75,21 +76,26 @@ zone outside;
 
 component webapp(process): zone=outside, cookies;
 """)
-        try:
+        with self.assertRaises(TmspecErrorDuplicateIdentifier) as cm:
             model = self.get_model(tree)
-            self.fail()
-        except TmspecError:
-            pass
+        # exc = cm.exception
+        # self.assertEqual(exc.msg, "bla")
+
+    def test_error_undefined_zone(self):
+        tree = self.get_parse_tree("""
+zone outside;
+
+component webapp(process): zone=inside, cookies;
+""")
+        with self.assertRaises(TmspecErrorUnknownIdentifier):
+            model = self.get_model(tree)
 
     def test_conflicting_base_types(self):
         tree = self.get_parse_tree("""
 component webapp(process, dataflow): ;
 """)
-        try:
+        with self.assertRaises(TmspecError):
             model = self.get_model(tree)
-            self.fail()
-        except TmspecError:
-            pass
 
     def test_conflicting_derived_types(self):
         tree = self.get_parse_tree("""
@@ -97,13 +103,8 @@ type encryptedflow(dataflow): https;
 
 component webapp(process, encryptedflow): ;
 """)
-        try:
+        with self.assertRaises(TmspecError):
             model = self.get_model(tree)
-            self.fail()
-        except TmspecError:
-            pass
-
-
 
 
 if __name__ == "__main__":

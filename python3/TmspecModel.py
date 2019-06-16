@@ -25,7 +25,6 @@ class TmspecModel:
             raise TmspecErrorUnknownIdentifier
 
     def add_zone(self, zone_name):
-        print("add zone", zone_name)
         if zone_name in self.identifiers:
             raise TmspecErrorDuplicateIdentifier("identifier {} already in use."
                             .format(zone_name))

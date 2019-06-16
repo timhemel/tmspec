@@ -9,6 +9,8 @@ class TmComponent(TmElement):
         self.name = name
         self.types = types
         self.attr = attrs
+    def get_attr(self, key):
+        return self.attr[key]
 
 class TmType(TmElement):
     def __init__(self, name, parents = [], attrs = {}):

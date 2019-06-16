@@ -50,8 +50,8 @@ component webapp(process): zone=outside, cookies;
         outside_zone = list(model.zones)[0]
         types = [ t.name for t in model.components['webapp'].types ]
         self.assertEqual(types, ['process'])
-        self.assertEqual(model.components['webapp'].attr['cookies'], True)
-        self.assertEqual(model.components['webapp'].attr['zone'], outside_zone)
+        self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
+        self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
 
     def test_parse_attribute_types(self):
         tree = self.get_parse_tree(r"""
@@ -61,18 +61,18 @@ component webapp(process): zone=outside, foo='bar\'s baz', https=true, lucky_num
 """)
         model = self.get_model(tree)
         outside_zone = list(model.zones)[0]
-        self.assertEqual(model.components['webapp'].attr['cookies'], True)
-        self.assertEqual(model.components['webapp'].attr['https'], True)
-        self.assertEqual(model.components['webapp'].attr['lucky_number'], 13)
-        self.assertEqual(model.components['webapp'].attr['foo'], 'bar\'s baz')
-        self.assertEqual(model.components['webapp'].attr['zone'], outside_zone)
+        self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
+        self.assertEqual(model.components['webapp'].get_attr('https'), True)
+        self.assertEqual(model.components['webapp'].get_attr('lucky_number'), 13)
+        self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\'s baz')
+        self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
 
     def test_parse_attribute_qstring_ends_with_backslash(self):
         tree = self.get_parse_tree(r"""
 component webapp(process): foo='bar\'s baz\\';
 """)
         model = self.get_model(tree)
-        self.assertEqual(model.components['webapp'].attr['foo'], 'bar\'s baz\\')
+        self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\'s baz\\')
 
     def test_error_on_duplicate_zone(self):
         tree = self.get_parse_tree("""
@@ -185,7 +185,7 @@ type encryptedflow(dataflow): https;
 component login(encryptedflow): ;
 """)
         model = self.get_model(tree)
-        self.assertEqual(model.components['login'].attr['https'], True)
+        self.assertEqual(model.components['login'].get_attr('https'), True)
 
 
 

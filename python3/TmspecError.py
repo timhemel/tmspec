@@ -8,3 +8,6 @@ class TmspecErrorDuplicateIdentifier(TmspecError):
 class TmspecErrorUnknownIdentifier(TmspecError):
     pass
 
+class TmspecErrorNotAType(TmspecError):
+    pass
+

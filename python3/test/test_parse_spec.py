@@ -44,7 +44,8 @@ component webapp(process): zone=outside, cookies;
 """)
         model = self.get_model(tree)
         outside_zone = list(model.zones)[0]
-        self.assertEqual(model.components['webapp'].types, ['process'])
+        types = [ t.name for t in model.components['webapp'].types ]
+        self.assertEqual(types, ['process'])
         self.assertEqual(model.components['webapp'].attr['cookies'], True)
         self.assertEqual(model.components['webapp'].attr['zone'], outside_zone)
 
@@ -114,12 +115,12 @@ component outside(process): ;
         with self.assertRaises(TmspecErrorDuplicateIdentifier):
             model = self.get_model(tree)
 
-    def test_component_type_already_used(self):
+    def test_component_type_not_a_type(self):
         tree = self.get_parse_tree("""
 zone outside;
 component webapp(process,outside): ;
 """)
-        with self.assertRaises(TmspecErrorDuplicateIdentifier):
+        with self.assertRaises(TmspecErrorNotAType):
             model = self.get_model(tree)
 
     def test_component_unknown_type(self):

@@ -17,17 +17,21 @@ class TestErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.errors.append((line, column, msg, e))
+        raise TmspecErrorParseError(msg, TmspecErrorContext(line, column))
 
 
 class TestParseSpec(unittest.TestCase):
 
     def get_parse_tree(self, data):
         inp = InputStream(data)
+        error_listener = TestErrorListener()
         lexer = tmspecLexer(inp)
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(error_listener)
         stream = CommonTokenStream(lexer)
         parser = tmspecParser(stream)
         parser.removeErrorListeners()
-        parser.addErrorListener(TestErrorListener())
+        parser.addErrorListener(error_listener)
         tree = parser.start()
         return tree
 
@@ -141,12 +145,18 @@ component webapp(yabbadabbadoo): ;
         self.assertEqual(exc.get_column(), 17)
 
     def test_parse_error_raises_exception(self):
-        tree = self.get_parse_tree("""
+        with self.assertRaises(TmspecErrorParseError):
+            tree = self.get_parse_tree("""
 yabbadabbadoo
 """)
-        with self.assertRaises(TmspecErrorParseError):
             model = self.get_model(tree)
 
+    def test_syntax_error_raises_exception(self):
+        with self.assertRaises(TmspecErrorParseError):
+            tree = self.get_parse_tree("""
+*#!@#yabbadabbadoo
+""")
+            model = self.get_model(tree)
 
 if __name__ == "__main__":
     unittest.main()

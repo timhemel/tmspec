@@ -42,6 +42,7 @@ class TestParseSpec(unittest.TestCase):
 
     def test_parse(self):
         tree = self.get_parse_tree("""
+version 0.0;
 zone outside;
 
 component webapp(process): zone=outside, cookies;
@@ -55,6 +56,7 @@ component webapp(process): zone=outside, cookies;
 
     def test_parse_attribute_types(self):
         tree = self.get_parse_tree(r"""
+version 0.0;
 zone outside;
 
 component webapp(process): zone=outside, foo='bar\'s baz', https=true, lucky_number=13, cookies;
@@ -69,6 +71,7 @@ component webapp(process): zone=outside, foo='bar\'s baz', https=true, lucky_num
 
     def test_parse_attribute_qstring_ends_with_backslash(self):
         tree = self.get_parse_tree(r"""
+version 0.0;
 component webapp(process): foo='bar\'s baz\\';
 """)
         model = self.get_model(tree)
@@ -76,6 +79,7 @@ component webapp(process): foo='bar\'s baz\\';
 
     def test_error_on_duplicate_zone(self):
         tree = self.get_parse_tree("""
+version 0.0;
 zone outside;
 zone outside;
 
@@ -86,6 +90,7 @@ component webapp(process): zone=outside, cookies;
 
     def test_error_undefined_zone(self):
         tree = self.get_parse_tree("""
+version 0.0;
 zone outside;
 
 component webapp(process): zone=inside, cookies;
@@ -95,6 +100,7 @@ component webapp(process): zone=inside, cookies;
 
     def test_conflicting_base_types(self):
         tree = self.get_parse_tree("""
+version 0.0;
 component webapp(process, datastore): ;
 """)
         with self.assertRaises(TmspecErrorConflictingTypes):
@@ -102,6 +108,7 @@ component webapp(process, datastore): ;
 
     def test_conflicting_derived_types(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedstore(datastore): encryption;
 
 component webapp(process, encryptedstore): ;
@@ -111,6 +118,7 @@ component webapp(process, encryptedstore): ;
 
     def test_component_identifier_already_used(self):
         tree = self.get_parse_tree("""
+version 0.0;
 zone outside;
 component outside(process): ;
 """)
@@ -119,6 +127,7 @@ component outside(process): ;
 
     def test_component_type_not_a_type(self):
         tree = self.get_parse_tree("""
+version 0.0;
 zone outside;
 component webapp(process,outside): ;
 """)
@@ -127,6 +136,7 @@ component webapp(process,outside): ;
 
     def test_component_unknown_type(self):
         tree = self.get_parse_tree("""
+version 0.0;
 component webapp(yabbadabbadoo): ;
 """)
         with self.assertRaises(TmspecErrorUnknownIdentifier):
@@ -134,12 +144,13 @@ component webapp(yabbadabbadoo): ;
 
     def test_errors_report_file_context(self):
         tree = self.get_parse_tree("""
+version 0.0;
 component webapp(yabbadabbadoo): ;
 """)
         with self.assertRaises(TmspecErrorUnknownIdentifier) as cm:
             model = self.get_model(tree)
         exc = cm.exception
-        self.assertEqual(exc.get_line(), 2)
+        self.assertEqual(exc.get_line(), 3)
         self.assertEqual(exc.get_column(), 17)
 
     def test_parse_error_raises_exception(self):
@@ -158,6 +169,7 @@ yabbadabbadoo
 
     def test_conflicting_types_in_definition(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedstore(datastore,process): encryption;
 
 component login(encryptedstore): ;
@@ -167,6 +179,7 @@ component login(encryptedstore): ;
 
     def test_conflicting_types_with_derived_type_in_definition(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type webapp(process): ;
 type encryptedstore(datastore,webapp): encryption;
 
@@ -179,6 +192,7 @@ component login(encryptedstore): ;
 
     def test_component_has_derived_type_attributes(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedstore(datastore): encryption;
 
 component login(encryptedstore): ;
@@ -188,6 +202,7 @@ component login(encryptedstore): ;
 
     def test_component_cannot_be_flow(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedflow(dataflow): https;
 
 component login(encryptedflow): ;
@@ -198,6 +213,7 @@ component login(encryptedflow): ;
 
     def test_flow(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedflow(dataflow): https;
 
 component webapp(process): ;
@@ -213,6 +229,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
 
     def test_flow_reverse(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedflow(dataflow): https;
 
 component webapp(process): ;
@@ -227,6 +244,7 @@ flow store_info(encryptedflow): webapp <-- database, pii;
 
     def test_flow_error_duplicate_identifier(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedflow(dataflow): https;
 
 component webapp(process): ;
@@ -240,6 +258,7 @@ flow webapp(encryptedflow): webapp --> database, pii;
 
     def test_flow_must_be_type_flow(self):
         tree = self.get_parse_tree("""
+version 0.0;
 type encryptedstore(datastore): encryption;
 
 component webapp(process): ;

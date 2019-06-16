@@ -1,13 +1,12 @@
 grammar tmspec;
 
-start: declaration* EOF;
+start: versiondef declaration* EOF;
 
 declaration: component
    | flow
    | zone
    | typedef
    | include
-   | versiondef
    ;
 
 component: 'component' name_and_type ':' attributes? ';' ;

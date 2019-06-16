@@ -122,6 +122,13 @@ component webapp(process,outside): ;
         with self.assertRaises(TmspecErrorDuplicateIdentifier):
             model = self.get_model(tree)
 
+    def test_component_unknown_type(self):
+        tree = self.get_parse_tree("""
+component webapp(yabbadabbadoo): ;
+""")
+        with self.assertRaises(TmspecErrorUnknownIdentifier):
+            model = self.get_model(tree)
+
 
 
 if __name__ == "__main__":

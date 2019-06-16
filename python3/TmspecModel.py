@@ -38,6 +38,7 @@ class TmspecModel:
                 'dataflow' : TmType('dataflow'),
                 'externalentity' : TmType('externalentity'),
         }
+        # self.types = {}
 
     def has_identifier(self, identifier):
         return identifier in self.identifiers
@@ -55,4 +56,8 @@ class TmspecModel:
     def add_component(self, component):
         self.components[component.name] = component
         self.identifiers[component.name] = component
+
+    def add_type(self, tm_type):
+        # self.types[tm_type.name] = tm_type
+        self.identifiers[tm_type.name] = tm_type
 

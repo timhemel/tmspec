@@ -36,6 +36,16 @@ class TmspecModelVisitor(tmspecVisitor):
         zone = TmZone(zone_name)
         self.model.add_zone(zone)
 
+    def visitTypedef(self, ctx):
+        type_name, type_parents = self.visitNameAndType(ctx.name_and_type())
+        if ctx.attributes():
+            attributes = self.visitAttributes(ctx.attributes())
+        else:
+            attributes = []
+        # TODO: check for type conflicts etc
+        new_type = TmType(type_name, type_parents, dict(attributes))
+        self.model.add_type(new_type)
+
     def visitComponent(self, ctx):
         component_name, component_types = self.visitNameAndType(ctx.name_and_type())
         if ctx.attributes():

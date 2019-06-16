@@ -1,6 +1,6 @@
 grammar tmspec;
 
-start: declaration*;
+start: declaration* EOF;
 
 declaration: component
    | flow

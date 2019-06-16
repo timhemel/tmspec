@@ -45,6 +45,7 @@ class TmspecModel:
     def __init__(self):
         self.zones = set([])
         self.components = {}
+        self.flows = {}
         self.identifiers = {
             'process' : TmType('process'),
             'datastore' : TmType('datastore'),

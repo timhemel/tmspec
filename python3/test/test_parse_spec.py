@@ -95,16 +95,16 @@ component webapp(process): zone=inside, cookies;
 
     def test_conflicting_base_types(self):
         tree = self.get_parse_tree("""
-component webapp(process, dataflow): ;
+component webapp(process, datastore): ;
 """)
         with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
 
     def test_conflicting_derived_types(self):
         tree = self.get_parse_tree("""
-type encryptedflow(dataflow): https;
+type encryptedstore(datastore): encryption;
 
-component webapp(process, encryptedflow): ;
+component webapp(process, encryptedstore): ;
 """)
         with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
@@ -158,9 +158,9 @@ yabbadabbadoo
 
     def test_conflicting_types_in_definition(self):
         tree = self.get_parse_tree("""
-type encryptedflow(dataflow,process): https;
+type encryptedstore(datastore,process): encryption;
 
-component login(encryptedflow): ;
+component login(encryptedstore): ;
 """)
         with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
@@ -168,22 +168,62 @@ component login(encryptedflow): ;
     def test_conflicting_types_with_derived_type_in_definition(self):
         tree = self.get_parse_tree("""
 type webapp(process): ;
-type encryptedflow(dataflow,webapp): https;
+type encryptedstore(datastore,webapp): encryption;
 
-component login(encryptedflow): ;
+component login(encryptedstore): ;
 """)
         with self.assertRaises(TmspecErrorConflictingTypes):
             model = self.get_model(tree)
 
+    # TODO: component cannot have dataflow type
 
     def test_component_has_derived_type_attributes(self):
+        tree = self.get_parse_tree("""
+type encryptedstore(datastore): encryption;
+
+component login(encryptedstore): ;
+""")
+        model = self.get_model(tree)
+        self.assertEqual(model.components['login'].get_attr('encryption'), True)
+
+    def test_component_cannot_be_flow(self):
         tree = self.get_parse_tree("""
 type encryptedflow(dataflow): https;
 
 component login(encryptedflow): ;
 """)
+        with self.assertRaises(TmspecErrorInvalidType):
+            model = self.get_model(tree)
+
+
+    def test_flow(self):
+        tree = self.get_parse_tree("""
+type encryptedflow(dataflow): https;
+
+component webapp(process): ;
+component database(datastore): ;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
         model = self.get_model(tree)
-        self.assertEqual(model.components['login'].get_attr('https'), True)
+        self.assertEqual(model.flows['login'].get_attr('pii'), True)
+        self.assertEqual(model.flows['login'].get_attr('https'), True)
+        self.assertEqual(model.flows['login'].source, model.components['webapp'])
+        self.assertEqual(model.flows['login'].target, model.components['database'])
+
+    def test_flow_must_be_type_flow(self):
+        tree = self.get_parse_tree("""
+type encryptedstore(datastore): encryption;
+
+component webapp(process): ;
+component database(datastore): ;
+
+flow store_info(encryptedstore): webapp --> database, pii;
+""")
+        with self.assertRaises(TmspecErrorInvalidType):
+            model = self.get_model(tree)
+
+
 
 
 

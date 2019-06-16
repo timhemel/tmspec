@@ -29,6 +29,9 @@ class TmspecErrorNotAType(TmspecError):
 class TmspecErrorConflictingTypes(TmspecError):
     pass
 
+class TmspecErrorInvalidType(TmspecError):
+    pass
+
 class TmspecErrorParseError(TmspecError):
     pass
 

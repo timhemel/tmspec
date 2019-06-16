@@ -46,7 +46,7 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = []
         try:
             self.model.add_component(component_name, component_types, attributes)
-        except TmspecDuplicateIdentifier as e:
+        except TmspecErrorDuplicateIdentifier as e:
             e.context = ctx.name_and_type()
 
     def visitNameAndType(self, ctx):

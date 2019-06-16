@@ -31,11 +31,10 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitZone(self, ctx):
         zone_name = ctx.identifier().getText()
-        try:
-            self.model.add_zone(zone_name)
-        except TmspecErrorDuplicateIdentifier as e:
-            e.context = ctx.identifier()
-            raise e
+        if self.model.has_identifier(zone_name):
+            raise TmspecErrorDuplicateIdentifier("identfier {} already in use.".format(zone_name), ctx.identifier())
+        zone = TmZone(zone_name)
+        self.model.add_zone(zone)
 
     def visitComponent(self, ctx):
         # self.visitChildren(ctx)
@@ -50,7 +49,6 @@ class TmspecModelVisitor(tmspecVisitor):
             e.context = ctx.name_and_type()
 
     def visitNameAndType(self, ctx):
-        self.visitChildren(ctx)
         name = ctx.identifier().getText()
         types = self.visitTyping(ctx.typing())
         return (name, types)

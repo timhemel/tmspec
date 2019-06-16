@@ -39,6 +39,9 @@ class TmspecModel:
                 'externalentity' : TmType('externalentity'),
         }
 
+    def has_identifier(self, identifier):
+        return identifier in self.identifiers
+
     def get_identifier(self, identifier):
         try:
             return self.identifiers[identifier]
@@ -48,13 +51,9 @@ class TmspecModel:
     def is_type(self, obj):
         return isinstance(obj, TmType)
 
-    def add_zone(self, zone_name):
-        if zone_name in self.identifiers:
-            raise TmspecErrorDuplicateIdentifier("identifier {} already in use."
-                            .format(zone_name))
-        zone = TmZone(zone_name)
+    def add_zone(self, zone):
         self.zones.add(zone)
-        self.identifiers[zone_name] = zone
+        self.identifiers[zone.name] = zone
 
     def add_component(self, component_name, component_types, attributes):
         if component_name in self.identifiers:

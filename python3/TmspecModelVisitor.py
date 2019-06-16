@@ -91,6 +91,7 @@ class TmspecModelVisitor(tmspecVisitor):
             obj = self.model.get_identifier(identifier)
             if obj is None:
                 raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(identifier), ctx.identifier())
+            return obj
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())
         if ctx.getText() == 'true':

@@ -5,7 +5,7 @@ class TmspecInputContext:
         self.line = line
         self.column = column
 
-def parse_context_to_error_context(ctx):
+def parse_context_to_input_context(ctx):
     return TmspecInputContext(ctx.start.line, ctx.start.column)
 
 class TmspecError(Exception):

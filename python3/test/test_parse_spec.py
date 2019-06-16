@@ -130,6 +130,15 @@ component webapp(yabbadabbadoo): ;
         with self.assertRaises(TmspecErrorUnknownIdentifier):
             model = self.get_model(tree)
 
+    def test_errors_report_file_context(self):
+        tree = self.get_parse_tree("""
+component webapp(yabbadabbadoo): ;
+""")
+        with self.assertRaises(TmspecErrorUnknownIdentifier) as cm:
+            model = self.get_model(tree)
+        exc = cm.exception
+        self.assertEqual(exc.context, 'abc')
+
 
 
 if __name__ == "__main__":

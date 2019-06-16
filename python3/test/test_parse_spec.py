@@ -44,6 +44,24 @@ component webapp(process): foo='bar\'s baz\\', zone=inside;
 """)
         self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\'s baz\\')
 
+    def test_parse_attribute_qstring_with_unicode(self):
+        model = parseString(r"""
+version 0.0;
+zone inside;
+component webapp(process): foo='bar\u1234s baz', zone=inside;
+""")
+        self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\u1234s baz')
+
+    def test_parse_attribute_qstring_with_newline(self):
+        model = parseString(r"""
+version 0.0;
+zone inside;
+component webapp(process): foo='bar\ns baz', zone=inside;
+""")
+        self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\ns baz')
+
+
+
     def test_error_on_duplicate_zone(self):
         with self.assertRaises(TmspecErrorDuplicateIdentifier):
             model = parseString("""

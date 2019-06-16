@@ -30,14 +30,11 @@ identifier : 'zone' | 'type' | 'flow' | 'include' | 'version' | 'component' | ID
 NUMBER: DIGIT+ ;
 ID : ('A'..'Z'|'a'..'z'|'_'|'0'..'9'|'@')+ ;
 VERSION: NUMBER '.' NUMBER ;
-// QSTRING: '\'' ( ~('\''|'\\') | '\\' '\'' | '\\' '\\' )* '\'';
-// QSTRING: '\'' ( ~'\'' | '\\' '\'' )* '\'';
 QSTRING: '\'' ( ESC | ~['\\] )* '\'';
 RARROW: '-->';
 LARROW: '<--';
 
 fragment DIGIT : [0-9] ;
-//fragment ESC : '\\\'' | '\\\\';
 fragment ESC : '\\' (['\\bfnrt] | UNICODE);
 fragment UNICODE : 'u' HEX HEX HEX HEX;
 fragment HEX : [0-9a-fA-F] ;

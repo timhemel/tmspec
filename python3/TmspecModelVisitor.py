@@ -40,7 +40,7 @@ class TmspecModelVisitor(tmspecVisitor):
         self.model.add_zone(zone)
 
     def visitTypedef(self, ctx):
-        type_name, type_parents = self.visitNameAndType(ctx.name_and_type())
+        type_name, type_parents = self.visitNameAndType(ctx.name_and_type(), None)
         if ctx.attributes():
             attributes = self.visitAttributes(ctx.attributes())
         else:
@@ -49,7 +49,7 @@ class TmspecModelVisitor(tmspecVisitor):
         self.model.add_type(new_type)
 
     def visitComponent(self, ctx):
-        component_name, component_types = self.visitNameAndType(ctx.name_and_type())
+        component_name, component_types = self.visitNameAndType(ctx.name_and_type(), ['datastore', 'process', 'externalentity'])
         if ctx.attributes():
             attributes = self.visitAttributes(ctx.attributes())
         else:
@@ -57,16 +57,19 @@ class TmspecModelVisitor(tmspecVisitor):
         component = TmComponent(component_name, component_types, dict(attributes))
         self.model.add_component(component)
 
-    def visitNameAndType(self, ctx):
+    def visitFlow(self, ctx):
+        pass
+
+    def visitNameAndType(self, ctx, type_restrictions):
         name = ctx.identifier().getText()
         if self.model.has_identifier(name):
             raise TmspecErrorDuplicateIdentifier(
                 "identifier {} already in use.".format(name),
                 parse_context_to_input_context(ctx.identifier()))
-        types = self.visitTyping(ctx.typing())
+        types = self.visitTyping(ctx.typing(), type_restrictions)
         return (name, types)
 
-    def visitTyping(self, ctx):
+    def visitTyping(self, ctx, type_restrictions):
         types = []
         base_types = set([])
         for c in ctx.identifier():
@@ -85,6 +88,12 @@ class TmspecModelVisitor(tmspecVisitor):
             else:
                 base_type = list(base_types)[0]
                 base_types.update(obj.get_base_types())
+            if type_restrictions is not None and base_type not in type_restrictions:
+                raise TmspecErrorInvalidType(
+                    "type {} derived from {}, but must be derived from {}"
+                    .format(c.getText(), base_type,
+                        ", ".join(type_restrictions)),
+                    parse_context_to_input_context(c))
             if len(base_types) > 1:
                 raise TmspecErrorConflictingTypes(
                     "type {} conflicts with {}".format(c.getText(), base_type),

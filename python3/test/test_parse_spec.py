@@ -140,6 +140,12 @@ component webapp(yabbadabbadoo): ;
         self.assertEqual(exc.get_line(), 2)
         self.assertEqual(exc.get_column(), 17)
 
+    def test_parse_error_raises_exception(self):
+        tree = self.get_parse_tree("""
+yabbadabbadoo
+""")
+        with self.assertRaises(TmspecErrorParseError):
+            model = self.get_model(tree)
 
 
 if __name__ == "__main__":

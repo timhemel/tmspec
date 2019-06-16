@@ -4,19 +4,31 @@ class TmElement:
     def __init__(self, name):
         self.name = name
 
-class TmComponent(TmElement):
-    def __init__(self, name, types, attrs = {}):
-        self.name = name
-        self.types = types
-        self.attr = attrs
-    def get_attr(self, key):
-        return self.attr[key]
+class TmElementWithAttributes(TmElement):
 
-class TmType(TmElement):
     def __init__(self, name, parents = [], attrs = {}):
         self.name = name
         self.parents = parents
-        self.attrs = attrs
+        self.attr = attrs
+
+    def get_attr(self, key):
+        try:
+            return self.attr[key]
+        except KeyError:
+            for p in self.parents:
+                try:
+                    return p.get_attr(key)
+                except KeyError:
+                    pass
+        raise KeyError(key)
+
+class TmComponent(TmElementWithAttributes):
+
+    def get_types(self):
+        return self.parents
+
+class TmType(TmElementWithAttributes):
+
     def get_base_types(self):
         if self.parents:
             base_types = set([])

@@ -48,7 +48,7 @@ component webapp(process): zone=outside, cookies;
 """)
         model = self.get_model(tree)
         outside_zone = list(model.zones)[0]
-        types = [ t.name for t in model.components['webapp'].types ]
+        types = [ t.name for t in model.components['webapp'].get_types() ]
         self.assertEqual(types, ['process'])
         self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
         self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)

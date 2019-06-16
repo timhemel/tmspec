@@ -88,11 +88,9 @@ class TmspecModelVisitor(tmspecVisitor):
             return int(ctx.number().getText())
         if ctx.identifier():
             identifier = ctx.identifier().getText()
-            try:
-                return self.model.get_identifier(identifier)
-            except TmspecErrorUnknownIdentifier as e:
-                e.context = ctx.identifier()
-                raise e
+            obj = self.model.get_identifier(identifier)
+            if obj is None:
+                raise TmspecErrorUnknownIdentifier("unknown identifier: {}".format(identifier), ctx.identifier())
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())
         if ctx.getText() == 'true':

@@ -50,7 +50,11 @@ class TmspecModelVisitor(tmspecVisitor):
             raise TmspecErrorDuplicateIdentifier(
                 "identfier {} already in use.".format(zone_name),
                 parse_context_to_input_context(ctx.identifier()))
-        zone = TmZone(zone_name)
+        if ctx.attributes():
+            attributes = dict(self.visitAttributes(ctx.attributes()))
+        else:
+            attributes = {}
+        zone = TmZone(zone_name, attributes)
         self.model.add_zone(zone)
 
     def visitTypedef(self, ctx):

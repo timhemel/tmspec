@@ -51,8 +51,9 @@ class TmFlow(TmElementWithAttributes):
         self.source = source
         self.target = target
 
-class TmZone(TmElement):
-    pass
+class TmZone(TmElementWithAttributes):
+    def __init__(self, name, attrs={}):
+        super(TmZone, self).__init__(name, [], attrs)
 
 class TmspecModel:
 

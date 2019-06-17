@@ -66,7 +66,7 @@ class TmspecModel:
                 'gv_shape': 'oval',
             }),
             'datastore' : TmType('datastore', attrs={
-                'gv_shape': 'note',
+                'gv_shape': 'cylinder',
                 # SVG image is possible, but must have width and height
                 # 'gv_image': '/usr/share/pixmaps/fedora-logo-sprite.svg',
                 # html labels are another possibility

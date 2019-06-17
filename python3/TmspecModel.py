@@ -22,6 +22,13 @@ class TmElementWithAttributes(TmElement):
                     pass
         raise KeyError(key)
 
+    def get_attributes(self):
+        d = {}
+        for p in reversed(self.parents):
+            d.update(p.get_attributes())
+        d.update(self.attr)
+        return d
+
 class TmComponent(TmElementWithAttributes):
 
     def get_types(self):
@@ -54,10 +61,20 @@ class TmspecModel:
         self.components = {}
         self.flows = {}
         self.identifiers = {
-            'process' : TmType('process'),
-            'datastore' : TmType('datastore'),
-            'dataflow' : TmType('dataflow'),
-            'externalentity' : TmType('externalentity'),
+            'process' : TmType('process', attrs={
+                'gv_shape': 'oval',
+            }),
+            'datastore' : TmType('datastore', attrs={
+                'gv_shape': 'note',
+                # SVG image is possible, but must have width and height
+                # 'gv_image': '/usr/share/pixmaps/fedora-logo-sprite.svg',
+                # html labels are another possibility
+            }),
+            'dataflow' : TmType('dataflow', attrs={
+            }),
+            'externalentity' : TmType('externalentity', attrs={
+                'gv_shape': 'rect',
+            }),
         }
         # self.types = {}
 

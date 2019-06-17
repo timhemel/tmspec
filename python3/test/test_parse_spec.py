@@ -78,7 +78,9 @@ component database(compinside);
 flow store: webapp --> database;
 """)
         zone = list(model.zones)[0]
-        self.assertEqual(self.model.component['database'].get_attributes(), [])
+        attrs = model.identifiers['process'].get_attributes()
+        attrs['zone'] = zone
+        self.assertEqual(model.components['database'].get_attributes(), attrs)
 
 
 

@@ -9,11 +9,11 @@ declaration: component
    | include
    ;
 
-component: 'component' name_and_type ':' attributes? ';' ;
+component: 'component' name_and_type ( ':' attributes )? ';' ;
 name_and_type: identifier typing ;
 attributes: attribute ( ',' attribute )*;
 attribute: identifier ( '=' value )? ;
-typedef: 'type' name_and_type ':' attributes? ';' ;
+typedef: 'type' name_and_type ( ':' attributes )? ';' ;
 zone: 'zone' identifier ( ':' attributes )? ';' ;
 versiondef: 'version' VERSION ';' ;
 include: 'include' QSTRING ';' ;

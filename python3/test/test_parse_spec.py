@@ -60,6 +60,25 @@ component webapp(process): foo='bar\ns baz', zone=inside;
 """)
         self.assertEqual(model.components['webapp'].get_attr('foo'), 'bar\ns baz')
 
+    def test_zone_with_attributes(self):
+        model = parseString(r"""
+version 0.0;
+zone inside : default;
+""")
+        zone = list(model.zones)[0]
+        self.assertEqual(zone.get_attr('default'), True)
+
+    def test_element_without_attributes(self):
+        model = parseString(r"""
+version 0.0;
+zone inside;
+component webapp(process);
+component database(datastore);
+flow store: webapp --> database;
+""")
+        zone = list(model.zones)[0]
+        self.assertEqual(self.model.component['database'].get_attributes(), [])
+
 
 
     def test_error_on_duplicate_zone(self):

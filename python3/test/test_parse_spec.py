@@ -72,8 +72,9 @@ zone inside : default;
         model = parseString(r"""
 version 0.0;
 zone inside;
-component webapp(process);
-component database(datastore);
+type compinside(process): zone=inside;
+component webapp(compinside);
+component database(compinside);
 flow store: webapp --> database;
 """)
         zone = list(model.zones)[0]

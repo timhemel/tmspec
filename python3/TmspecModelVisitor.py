@@ -60,10 +60,10 @@ class TmspecModelVisitor(tmspecVisitor):
     def visitTypedef(self, ctx):
         type_name, type_parents = self.visitNameAndType(ctx.name_and_type(), None)
         if ctx.attributes():
-            attributes = self.visitAttributes(ctx.attributes())
+            attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
-            attributes = []
-        new_type = TmType(type_name, type_parents, dict(attributes))
+            attributes = {}
+        new_type = TmType(type_name, type_parents, attributes)
         self.model.add_type(new_type)
 
     def visitComponent(self, ctx):

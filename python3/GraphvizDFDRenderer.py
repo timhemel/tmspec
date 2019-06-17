@@ -28,16 +28,22 @@ class GraphvizDFDRenderer:
         for z in self.model.zones:
             zone_components = [ v for c,v in self.model.components.items()
                     if v.get_attr('zone') == z ]
-            cluster_attrs = {
-                'color': 'red',
-                'style': 'dashed',
-                'fontcolor': 'red',
-                'labelloc': 't',
-                'labeljust': 'r',
-                'overlap': 'scale',
-            }
+            try:
+                z.get_attr('default')
+                cluster_attrs = {
+                    'style': 'invis',
+                }
+            except KeyError:
+                cluster_attrs = {
+                    'color': 'red',
+                    'style': 'dashed',
+                    'fontcolor': 'red',
+                    'labelloc': 't',
+                    'labeljust': 'r',
+                    'label': z.name,
+                }
+ 
             with g.subgraph(name='cluster_'+z.name, graph_attr=cluster_attrs) as cluster:
-                cluster.attr(label=z.name)
                 for c in zone_components:
                     node_attrs = self._get_graphviz_attributes(c)
                     cluster.node(c.name, label=c.name, _attributes=node_attrs)

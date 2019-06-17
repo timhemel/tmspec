@@ -180,7 +180,7 @@ component login(encryptedstore): zone=outside ;
         with self.assertRaises(TmspecErrorConflictingTypes):
             model = parseString("""
 version 0.0;
-type webapp(process): ;
+type webapp(process);
 type encryptedstore(datastore,webapp): encryption;
 zone outside;
 component login(encryptedstore): zone=outside;
@@ -210,7 +210,7 @@ component login(encryptedflow): zone=outside;
 version 0.0;
 type encryptedstore(datastore): encryption;
 zone outside;
-component login(encryptedstore): ;
+component login(encryptedstore);
 """)
  
 

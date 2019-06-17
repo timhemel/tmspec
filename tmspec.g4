@@ -17,7 +17,7 @@ typedef: 'type' name_and_type ':' attributes? ';' ;
 zone: 'zone' identifier ';' ;
 versiondef: 'version' VERSION ';' ;
 include: 'include' QSTRING ';' ;
-flow: 'flow' identifier typing?':' identifier arrow identifier ',' attributes? ';' ;
+flow: 'flow' identifier typing?':' identifier arrow identifier (',' attributes)? ';' ;
 arrow: RARROW | LARROW ;
 typing: '(' identifier (',' identifier)* ')' ;
 value:  boolean | number | identifier | QSTRING ;

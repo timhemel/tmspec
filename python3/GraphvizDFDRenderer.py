@@ -20,8 +20,12 @@ class GraphvizDFDRenderer:
                 'fontname': 'Sans',
                 'fontsize': '8',
                 'rankdir': 'LR',
+                'splines': 'spline',
+                'size': '7.5,10',
+                'ratio': 'fill',
             }, node_attr={
                 'fontname': 'Sans',
+                'fontsize': '12',
             }, edge_attr={
                 'fontname': 'Sans',
                 'fontsize': '8',

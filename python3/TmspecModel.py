@@ -69,18 +69,20 @@ class TmspecModel:
         self.components = {}
         self.flows = {}
         self.identifiers = {
-            'process' : TmType('process', attrs={
+            'process' : TmType('process', None, attrs={
                 'gv_shape': 'oval',
             }),
-            'datastore' : TmType('datastore', attrs={
-                'gv_shape': 'cylinder',
+            'datastore' : TmType('datastore', None, attrs={
+                #'gv_shape': 'cylinder',
+                'gv_shape': 'none',
                 # SVG image is possible, but must have width and height
                 # 'gv_image': '/usr/share/pixmaps/fedora-logo-sprite.svg',
+                'gv_image': '/home/tim/tmspec/python3/test/datastore.svg',
                 # html labels are another possibility
             }),
-            'dataflow' : TmType('dataflow', attrs={
+            'dataflow' : TmType('dataflow', None, attrs={
             }),
-            'externalentity' : TmType('externalentity', attrs={
+            'externalentity' : TmType('externalentity', None, attrs={
                 'gv_shape': 'rect',
             }),
         }

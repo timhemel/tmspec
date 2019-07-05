@@ -4,6 +4,8 @@ class TmspecInputContext:
         # TODO: filename?
         self.line = line
         self.column = column
+    def get_position(self):
+        return self.line, self.column
 
 def parse_context_to_input_context(ctx):
     return TmspecInputContext(ctx.start.line, ctx.start.column)

@@ -34,6 +34,10 @@ def unquote_string(s):
         i += 1
     return r
 
+def get_context_position(ctx):
+    print(dir(ctx))
+    return ctx.line, ctx.column
+
 class TmspecModelVisitor(tmspecVisitor):
 
     def __init__(self):
@@ -46,6 +50,7 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitZone(self, ctx):
         zone_name = ctx.identifier().getText()
+        zone_ctx = parse_context_to_input_context(ctx)
         if self.model.has_identifier(zone_name):
             raise TmspecErrorDuplicateIdentifier(
                 "identfier {} already in use.".format(zone_name),
@@ -54,25 +59,27 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
             attributes = {}
-        zone = TmZone(zone_name, attributes)
+        zone = TmZone(zone_name, zone_ctx, attributes)
         self.model.add_zone(zone)
 
     def visitTypedef(self, ctx):
         type_name, type_parents = self.visitNameAndType(ctx.name_and_type(), None)
+        type_ctx = parse_context_to_input_context(ctx)
         if ctx.attributes():
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
             attributes = {}
-        new_type = TmType(type_name, type_parents, attributes)
+        new_type = TmType(type_name, type_ctx, type_parents, attributes)
         self.model.add_type(new_type)
 
     def visitComponent(self, ctx):
         component_name, component_types = self.visitNameAndType(ctx.name_and_type(), ['datastore', 'process', 'externalentity'])
+        component_ctx = parse_context_to_input_context(ctx)
         if ctx.attributes():
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
             attributes = {}
-        component = TmComponent(component_name, component_types, attributes)
+        component = TmComponent(component_name, component_ctx, component_types, attributes)
         try:
             component.get_attr('zone')
         except KeyError:
@@ -93,6 +100,7 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitFlow(self, ctx):
         name = ctx.identifier(0).getText()
+        flow_ctx = parse_context_to_input_context(ctx)
         if self.model.has_identifier(name):
             raise TmspecErrorDuplicateIdentifier(
                 "identifier {} already in use.".format(name),
@@ -116,7 +124,7 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = self.visitAttributes(ctx.attributes())
         else:
             attributes = []
-        flow = TmFlow(name, source, target, types, dict(attributes))
+        flow = TmFlow(name, flow_ctx, source, target, types, dict(attributes))
         self.model.add_flow(flow)
 
     def visitNameAndType(self, ctx, type_restrictions):

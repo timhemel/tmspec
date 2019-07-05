@@ -6,10 +6,14 @@ class TmElement:
 
 class TmElementWithAttributes(TmElement):
 
-    def __init__(self, name, parents=[], attrs={}):
+    def __init__(self, name, input_ctx, parents=[], attrs={}):
         super(TmElementWithAttributes, self).__init__(name)
         self.parents = parents
         self.attr = attrs
+        self.input_ctx = input_ctx
+
+    def get_position(self):
+        return self.input_ctx.get_position()
 
     def get_attr(self, key):
         try:
@@ -46,14 +50,17 @@ class TmType(TmElementWithAttributes):
 
 class TmFlow(TmElementWithAttributes):
 
-    def __init__(self, name, source, target, parents=[], attrs={}):
-        super(TmFlow, self).__init__(name, parents, attrs)
+    def __init__(self, name, input_ctx, source, target, parents=[], attrs={}):
+        super(TmFlow, self).__init__(name, input_ctx, parents, attrs)
         self.source = source
         self.target = target
 
 class TmZone(TmElementWithAttributes):
-    def __init__(self, name, attrs={}):
-        super(TmZone, self).__init__(name, [], attrs)
+    def __init__(self, name, input_ctx, attrs={}):
+        super(TmZone, self).__init__(name, input_ctx, [], attrs)
+
+def defined_before(e1, e2):
+    return e1.get_position() <= e2.get_position()
 
 class TmspecModel:
 
@@ -88,6 +95,21 @@ class TmspecModel:
     def add_zone(self, zone):
         self.zones.add(zone)
         self.identifiers[zone.name] = zone
+
+    def get_zones(self):
+        # TODO: check if we can preserve parse order
+        return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones ]) ]
+
+    def get_zone_components(self, z):
+        return [ x[1] for x in
+                sorted([ (v.get_position(), v)
+                    for c,v in self.components.items()
+                    if v.get_attr('zone') == z ]) ]
+
+    def get_flows(self):
+        return [ x[1] for x in 
+            sorted([ (v.get_position(), v) for v in self.flows.values() ]) ]
+
 
     def add_component(self, component):
         self.components[component.name] = component

@@ -1,4 +1,5 @@
 from graphviz import Digraph
+from TmspecModel import *
 
 class GraphvizDFDRenderer:
 
@@ -25,9 +26,8 @@ class GraphvizDFDRenderer:
                 'fontname': 'Sans',
                 'fontsize': '8',
             })
-        for z in self.model.zones:
-            zone_components = [ v for c,v in self.model.components.items()
-                    if v.get_attr('zone') == z ]
+        for z in self.model.get_zones():
+            zone_components = self.model.get_zone_components(z)
             try:
                 z.get_attr('default')
                 cluster_attrs = {
@@ -47,12 +47,16 @@ class GraphvizDFDRenderer:
                 for c in zone_components:
                     node_attrs = self._get_graphviz_attributes(c)
                     cluster.node(c.name, label=c.name, _attributes=node_attrs)
-        for f,v in self.model.flows.items():
+        for v in self.model.get_flows():
             edge_attrs = self._get_graphviz_attributes(v)
             try:
                 label = v.get_attr('label')
             except KeyError:
                 label = None
-            g.edge(v.source.name, v.target.name, label=label, _attributes=edge_attrs)
+            
+            if defined_before(v.source, v.target):
+                g.edge(v.source.name, v.target.name, label=label, _attributes=edge_attrs)
+            else:
+                g.edge(v.target.name, v.source.name, label=label, dir='back', _attributes=edge_attrs)
         return g
 

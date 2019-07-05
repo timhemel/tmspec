@@ -19,6 +19,9 @@ class TmspecError(Exception):
     def get_column(self):
         return self.context.column
 
+    def __str__(self):
+        return "ERROR:%d:%d:%s" % (self.context.line, self.context.column, self.msg)
+
 class TmspecErrorDuplicateIdentifier(TmspecError):
     pass
 

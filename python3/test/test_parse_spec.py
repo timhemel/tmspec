@@ -2,8 +2,6 @@ import unittest
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
 
-import sys
-sys.path.insert(0, '..')
 from TmspecError import *
 from TmspecParser import *
 

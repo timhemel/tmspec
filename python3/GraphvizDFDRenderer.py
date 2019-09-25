@@ -11,25 +11,25 @@ class GraphvizDFDRenderer:
         return g.view()
 
     def _get_graphviz_attributes(self, element):
-        gv_attrs = [ (a[3:], v) for a,v in element.get_attributes().items()
-                    if a.startswith('gv_') ]
+        gv_attrs = [(a[3:], v) for a, v in element.get_attributes().items()
+                        if a.startswith('gv_')]
         return dict(gv_attrs)
 
     def _render(self):
         g = Digraph('G', engine='dot', graph_attr={
-                'fontname': 'Sans',
-                'fontsize': '8',
-                'rankdir': 'LR',
-                'splines': 'spline',
-                'size': '7.5,10',
-                'ratio': 'fill',
-            }, node_attr={
-                'fontname': 'Sans',
-                'fontsize': '12',
-            }, edge_attr={
-                'fontname': 'Sans',
-                'fontsize': '8',
-            })
+            'fontname': 'Sans',
+            'fontsize': '8',
+            'rankdir': 'LR',
+            'splines': 'spline',
+            'size': '7.5,10',
+            'ratio': 'fill',
+        }, node_attr={
+            'fontname': 'Sans',
+            'fontsize': '12',
+        }, edge_attr={
+            'fontname': 'Sans',
+            'fontsize': '8',
+        })
         for z in self.model.get_zones():
             zone_components = self.model.get_zone_components(z)
             try:

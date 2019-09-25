@@ -32,12 +32,14 @@ flow store_info(encryptedflow): webapp --> database, pii;
     def test_model_query_zone(self):
         a = ThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
-        v1 = a.query_engine.variable()
-        v2 = a.query_engine.variable()
+        elt = a.query_engine.variable()
+        value = a.query_engine.variable()
+        const_zone = a.query_engine.atom('zone')
+        f = a.query_engine.functor('property', [elt, const_zone, value])
+        q = a.query_engine.query('zone', [f])
+        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
         zone = self.dfd_with_flows.get_zones()[0]
         components = self.dfd_with_flows.get_zone_components(zone)
-        q = a.query_engine.query('zone', [v1, v2])
-        r = [ [v1.get_value(), v2.get_value() ] for _ in q ]
         self.assertEqual(r, [(components[0], zone), (components[1], zone)])
 
     def test_model_one_threat(self):

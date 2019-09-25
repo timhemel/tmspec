@@ -5,6 +5,7 @@ import pathlib
 
 from TmspecParser import *
 from ThreatAnalyzer import ThreatAnalyzer
+from ThreatLibrary import ThreatLibrary
 from GraphvizDFDRenderer import *
 
 class TmToolApp:
@@ -46,7 +47,9 @@ class TmToolApp:
             for tfn in self.args.threats:
                 # convert t to prolog file path
                 p = pathlib.Path(tfn)
-                a.add_threat_library_from_prolog_file(p)
+                t = ThreatLibrary()
+                t.from_prolog_file(p)
+                a.add_threat_library(t)
             results = a.analyze()
         except TmspecError as e:
             print(e)

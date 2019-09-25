@@ -28,6 +28,15 @@ flow store_info(encryptedflow): webapp --> database, pii;
         r = a.analyze()
         self.assertEqual(r.get_threats(), [])
         self.assertEqual(r.get_questions(), [])
+    
+    def test_model_query_zone(self):
+        a = ThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        v1 = a.query_engine.variable()
+        v2 = a.query_engine.variable()
+        q = a.query_engine.query('zone', [v1, v2])
+        r = [ [v1.get_value(), v2.get_value() ] for _ in q ]
+        self.assertEqual(r, [('webapp', 'outside'), ('database', 'outside')])
 
     def test_model_one_threat(self):
         a = ThreatAnalyzer()

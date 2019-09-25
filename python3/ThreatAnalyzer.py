@@ -26,10 +26,13 @@ class ThreatAnalyzer:
         self.threat_libraries.append(threat_library)
 
     def add_prolog_facts_from_model(self):
-        print(self.model.get_zones())
         for z in self.model.get_zones():
-            for c in self.model.get_zone_components(z):
-                print(z, c)
+            for component in self.model.get_zone_components(z):
+                for key, value in component.get_attributes().items():
+                    c_property = self.query_engine.atom('property')
+                    c_key = self.query_engine.atom(key)
+                    self.query_engine.assert_fact(c_property, [
+                        component, c_key, value ])
         for f in self.model.get_flows():
             print(f.name, f.source, f.target, f.get_attributes())
 

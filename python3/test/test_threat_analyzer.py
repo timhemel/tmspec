@@ -13,6 +13,9 @@ from yldprolog.engine import get_value, to_python
 class FTOThreatAnalyzer(ThreatAnalyzer):
     # For Testing Only
 
+    def __init__(self):
+        super().__init__()
+
     def variable(self):
         return self.query_engine.variable()
 
@@ -22,8 +25,8 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
     def query(self, name, args):
         return self.query_engine.query(name, args)
 
-    def get_questions(self):
-        return []
+    def get_undefined_properties(self):
+        return self.undefined_properties
 
 
 class TestThreatAnalyzer(unittest.TestCase):
@@ -75,14 +78,15 @@ flow store_info(encryptedflow): webapp --> database, pii;
     def test_model_query_undefined_property(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
-        elt = a.variable()
+        flows = self.dfd_with_flows.get_flows()
+        # elt = a.variable()
+        elt = a.atom(flows[0])
         value = a.variable()
         const_key = a.atom('define_me')
         q = a.query('property', [elt, const_key, value])
         r = [[to_python(elt), to_python(value)] for _ in q]
-        flows = self.dfd_with_flows.get_flows()
         self.assertEqual(r, [])
-        self.assertEqual(len(a.get_questions()), 1)
+        self.assertEqual(len(a.get_undefined_properties()), 1)
 
 
     def test_model_query_flow_property(self):
@@ -117,6 +121,7 @@ threat(['test', '001', 0], [P],
         self.assertEqual(len(r.get_threats()), 1)
         self.assertEqual(len(r.get_questions()), 1)
 
+    # must clear errors, threats, questions etc. between analyses
 
 if __name__ == "__main__":
     unittest.main()

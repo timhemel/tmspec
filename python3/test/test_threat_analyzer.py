@@ -43,6 +43,31 @@ flow store_info(encryptedflow): webapp --> database, pii;
         r = a.analyze()
         self.assertEqual(r.get_threats(), [])
         self.assertEqual(r.get_questions(), [])
+
+    def test_model_query_element_type(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        zone = self.dfd_with_flows.get_zones()[0]
+        components = self.dfd_with_flows.get_zone_components(zone)
+        elt = a.atom(components[0])
+        value = a.variable()
+        q = a.query('type', [elt, value])
+        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        print(components[0].get_types()[0].name)
+        self.assertEqual(r, [[components[0], components[0].get_types()[0]]])
+    
+    def test_model_query_element_type_inherited(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        zone = self.dfd_with_flows.get_zones()[0]
+        flows = self.dfd_with_flows.get_flows()
+        elt = a.atom(flows[0])
+        value = a.variable()
+        q = a.query('type', [elt, value])
+        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        print(flows[0].get_types()[0].name)
+        self.assertEqual(r, [[flows[0], flows[0].get_types()[0]]])
+
     
     def test_model_query_component_zone(self):
         a = FTOThreatAnalyzer()

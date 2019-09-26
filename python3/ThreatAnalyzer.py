@@ -25,22 +25,36 @@ class ThreatAnalyzer:
         self.add_prolog_rules_from_threat_library(threat_library)
         self.threat_libraries.append(threat_library)
 
+    def add_clause_element(self, element, element_type):
+        c_element = self.query_engine.atom('element')
+        a_element = self.query_engine.atom(element)
+        a_element_type = self.query_engine.atom(element_type)
+        self.query_engine.assert_fact(c_element, [a_element, a_element_type])
+
+    def add_clause_prop(self, element, key, value):
+        c_property = self.query_engine.atom('property')
+        a_element = self.query_engine.atom(element)
+        a_key = self.query_engine.atom(key)
+        a_value = self.query_engine.atom(value)
+        self.query_engine.assert_fact(c_property, [a_element, a_key, a_value])
+
+    def add_element_types(self, element):
+        for element_type in element.get_types():
+            self.add_clause_element(element, element_type)
+
+    def add_element_properties(self, element):
+        for key, value in element.get_attributes().items():
+            self.add_clause_prop(element, key, value)
+
     def add_prolog_facts_from_model(self):
         for z in self.model.get_zones():
             for component in self.model.get_zone_components(z):
-                for key, value in component.get_attributes().items():
-                    c_property = self.query_engine.atom('property')
-                    c_key = self.query_engine.atom(key)
-                    self.query_engine.assert_fact(c_property, [
-                        component, c_key, value ])
+                self.add_element_types(component)
+                self.add_element_properties(component)
         for flow in self.model.get_flows():
-            for key, value in flow.get_attributes().items():
-                c_property = self.query_engine.atom('property')
-                c_key = self.query_engine.atom(key)
-                self.query_engine.assert_fact(c_property, [
-                    flow, c_key, value ])
-            
-            print(flow.name, flow.source, flow.target, flow.get_attributes())
+            self.add_element_types(flow)
+            self.add_element_properties(flow)
+            # print(flow.name, flow.source, flow.target, flow.get_attributes())
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         pass

@@ -8,6 +8,7 @@ from TmspecParser import parseString
 from ThreatAnalyzer import ThreatAnalyzer
 from ThreatLibrary import ThreatLibrary
 
+from yldprolog.engine import get_value, to_python
 
 class FTOThreatAnalyzer(ThreatAnalyzer):
     # For Testing Only
@@ -37,13 +38,6 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
 
-    def test_model_no_threats(self):
-        a = ThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        r = a.analyze()
-        self.assertEqual(r.get_threats(), [])
-        self.assertEqual(r.get_questions(), [])
-
     def test_model_query_element_type(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
@@ -51,9 +45,8 @@ flow store_info(encryptedflow): webapp --> database, pii;
         components = self.dfd_with_flows.get_zone_components(zone)
         elt = a.atom(components[0])
         value = a.variable()
-        q = a.query('type', [elt, value])
-        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
-        print(components[0].get_types()[0].name)
+        q = a.query('element', [elt, value])
+        r = [[to_python(elt), to_python(value) ] for _ in q]
         self.assertEqual(r, [[components[0], components[0].get_types()[0]]])
     
     def test_model_query_element_type_inherited(self):
@@ -63,11 +56,9 @@ flow store_info(encryptedflow): webapp --> database, pii;
         flows = self.dfd_with_flows.get_flows()
         elt = a.atom(flows[0])
         value = a.variable()
-        q = a.query('type', [elt, value])
-        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
-        print(flows[0].get_types()[0].name)
+        q = a.query('element', [elt, value])
+        r = [[to_python(elt), to_python(value)] for _ in q]
         self.assertEqual(r, [[flows[0], flows[0].get_types()[0]]])
-
     
     def test_model_query_component_zone(self):
         a = FTOThreatAnalyzer()
@@ -76,7 +67,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         value = a.variable()
         const_zone = a.atom('zone')
         q = a.query('property', [elt, const_zone, value])
-        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        r = [[to_python(elt), to_python(value)] for _ in q]
         zone = self.dfd_with_flows.get_zones()[0]
         components = self.dfd_with_flows.get_zone_components(zone)
         self.assertEqual(r, [[components[0], zone], [components[1], zone]])
@@ -88,7 +79,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         value = a.variable()
         const_key = a.atom('define_me')
         q = a.query('property', [elt, const_key, value])
-        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        r = [[to_python(elt), to_python(value)] for _ in q]
         flows = self.dfd_with_flows.get_flows()
         self.assertEqual(r, [])
         self.assertEqual(len(a.get_questions()), 1)
@@ -101,9 +92,16 @@ flow store_info(encryptedflow): webapp --> database, pii;
         value = a.variable()
         const_key = a.atom('https')
         q = a.query('property', [elt, const_key, value])
-        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        r = [[to_python(elt), to_python(value)] for _ in q]
         flows = self.dfd_with_flows.get_flows()
         self.assertEqual(r, [[flows[0], True]])
+
+    def test_analyze_model_no_threats(self):
+        a = ThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        r = a.analyze()
+        self.assertEqual(r.get_threats(), [])
+        self.assertEqual(r.get_questions(), [])
 
     def test_model_one_threat(self):
         a = ThreatAnalyzer()

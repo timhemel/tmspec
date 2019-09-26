@@ -3,6 +3,17 @@ import yldprolog.engine
 from yldprolog.engine import get_value, to_python
 from yldprolog.engine import Atom
 
+class ThreatAnalysisError:
+
+    def __init__(self, element, message):
+        """An error during the analysis. element is the element for which
+        the error is raised (multiple elements is not possible, because we
+        want one (line, column) pair for error reporting).
+        message is a string with the error message."""
+
+        self.message = message
+        self.element = element
+
 class AnalysisResult:
 
     def get_threats(self):
@@ -18,6 +29,7 @@ class ThreatAnalyzer:
         self.set_prolog_base_functions()
         self.threat_libraries = []
         self.undefined_properties = set()
+        self.errors = []
 
     def set_prolog_base_functions(self):
         self.query_engine.register_function('property',
@@ -88,14 +100,22 @@ class ThreatAnalyzer:
             self.add_clause_prop(element, key, value)
 
     def add_prolog_facts_from_model(self):
+        components = set()
         for z in self.model.get_zones():
             for component in self.model.get_zone_components(z):
                 self.add_element_types(component)
                 self.add_element_properties(component)
+                components.add(component)
         for flow in self.model.get_flows():
             self.add_element_types(flow)
             self.add_element_properties(flow)
+            components.remove(flow.source)
+            components.remove(flow.target)
             # print(flow.name, flow.source, flow.target, flow.get_attributes())
+        for c in components:
+            e = ThreatAnalysisError(c, 'component without flow')
+            self.errors.append(e)
+        
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         pass

@@ -9,6 +9,21 @@ from ThreatAnalyzer import ThreatAnalyzer
 from ThreatLibrary import ThreatLibrary
 
 
+class FTOThreatAnalyzer(ThreatAnalyzer):
+    # For Testing Only
+
+    def variable(self):
+        return self.query_engine.variable()
+
+    def atom(self, name):
+        return self.query_engine.atom(name)
+
+    def query(self, name, args):
+        return self.query_engine.query(name, args)
+
+    def get_questions(self):
+        return []
+
 
 class TestThreatAnalyzer(unittest.TestCase):
 
@@ -29,17 +44,41 @@ flow store_info(encryptedflow): webapp --> database, pii;
         self.assertEqual(r.get_threats(), [])
         self.assertEqual(r.get_questions(), [])
     
-    def test_model_query_zone(self):
-        a = ThreatAnalyzer()
+    def test_model_query_component_zone(self):
+        a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
-        elt = a.query_engine.variable()
-        value = a.query_engine.variable()
-        const_zone = a.query_engine.atom('zone')
-        q = a.query_engine.query('property', [elt, const_zone, value])
+        elt = a.variable()
+        value = a.variable()
+        const_zone = a.atom('zone')
+        q = a.query('property', [elt, const_zone, value])
         r = [ [elt.get_value(), value.get_value() ] for _ in q ]
         zone = self.dfd_with_flows.get_zones()[0]
         components = self.dfd_with_flows.get_zone_components(zone)
         self.assertEqual(r, [[components[0], zone], [components[1], zone]])
+
+    def test_model_query_undefined_property(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        elt = a.variable()
+        value = a.variable()
+        const_key = a.atom('define_me')
+        q = a.query('property', [elt, const_key, value])
+        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        flows = self.dfd_with_flows.get_flows()
+        self.assertEqual(r, [])
+        self.assertEqual(len(a.get_questions()), 1)
+
+
+    def test_model_query_flow_property(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        elt = a.variable()
+        value = a.variable()
+        const_key = a.atom('https')
+        q = a.query('property', [elt, const_key, value])
+        r = [ [elt.get_value(), value.get_value() ] for _ in q ]
+        flows = self.dfd_with_flows.get_flows()
+        self.assertEqual(r, [[flows[0], True]])
 
     def test_model_one_threat(self):
         a = ThreatAnalyzer()

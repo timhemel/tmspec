@@ -33,8 +33,14 @@ class ThreatAnalyzer:
                     c_key = self.query_engine.atom(key)
                     self.query_engine.assert_fact(c_property, [
                         component, c_key, value ])
-        for f in self.model.get_flows():
-            print(f.name, f.source, f.target, f.get_attributes())
+        for flow in self.model.get_flows():
+            for key, value in flow.get_attributes().items():
+                c_property = self.query_engine.atom('property')
+                c_key = self.query_engine.atom(key)
+                self.query_engine.assert_fact(c_property, [
+                    flow, c_key, value ])
+            
+            print(flow.name, flow.source, flow.target, flow.get_attributes())
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         pass

@@ -30,8 +30,8 @@ class ThreatAnalyzer:
         """Answers the query property(element, prop_key, prop_value).
         element, prop_key and prop_value are all prolog data types.
         If the property is not defined, it gets recorded in the
-        list of requested but undefined properties. We can only do
-        this if element and prop_key are non-variable prolog values.
+        list of requested but undefined properties, but only if
+        prop_key is not a variable.
         """
         const_element = self.query_engine.atom('element')
         vtype = self.query_engine.variable()

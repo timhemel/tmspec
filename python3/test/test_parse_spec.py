@@ -265,6 +265,31 @@ component database(datastore): zone=outside;
 flow store_info(encryptedstore): webapp --> database, pii;
 """)
 
+    def test_flow_has_type(self):
+        model = parseString("""
+version 0.0;
+type encryptedflow(dataflow): encryption;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
+        types = [t.name for t in model.flows['store_info'].get_types()]
+        self.assertEqual(types, ['encryptedflow'])
+
+    def test_derived_type_has_type(self):
+        model = parseString("""
+version 0.0;
+type encryptedflow(dataflow): encryption;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
+        types = [t.name for t in model.types['encryptedflow'].get_types()]
+        self.assertEqual(types, ['dataflow'])
 
 
 

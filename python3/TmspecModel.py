@@ -33,10 +33,13 @@ class TmElementWithAttributes(TmElement):
         d.update(self.attr)
         return d
 
-class TmComponent(TmElementWithAttributes):
-
     def get_types(self):
         return self.parents
+
+class TmComponent(TmElementWithAttributes):
+
+    pass
+
 
 class TmType(TmElementWithAttributes):
 
@@ -86,7 +89,7 @@ class TmspecModel:
                 'gv_shape': 'rect',
             }),
         }
-        # self.types = {}
+        self.types = self.identifiers.copy()
 
     def has_identifier(self, identifier):
         return identifier in self.identifiers
@@ -122,5 +125,5 @@ class TmspecModel:
         self.identifiers[flow.name] = flow
 
     def add_type(self, tm_type):
-        # self.types[tm_type.name] = tm_type
+        self.types[tm_type.name] = tm_type
         self.identifiers[tm_type.name] = tm_type

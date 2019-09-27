@@ -28,8 +28,8 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
     def get_undefined_properties(self):
         return self.undefined_properties
 
-    def get_errors(self):
-        return sorted(self.errors, key=lambda x: x.element.get_position())
+    def get_model_loading_errors(self):
+        return sorted(self.model_loading_errors, key=lambda x: x.element.get_position())
 
 class TestThreatAnalyzer(unittest.TestCase):
 
@@ -133,9 +133,11 @@ flow store_info(encryptedflow): webapp --> database, pii;
     def test_error_component_without_flow(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_without_flows)
-        self.assertEqual(len(a.get_errors()),2)
-        self.assertEqual(a.get_errors()[0].message, 'component without flow')
-        self.assertEqual(a.get_errors()[0].element.name, 'webapp')
+        self.assertEqual(len(a.get_model_loading_errors()),2)
+        self.assertEqual(a.get_model_loading_errors()[0].message,
+                'component without flow')
+        self.assertEqual(a.get_model_loading_errors()[0].element.name,
+                'webapp')
 
     def test_analyzer_loads_script(self):
         a = FTOThreatAnalyzer()

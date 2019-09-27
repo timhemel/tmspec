@@ -61,7 +61,7 @@ class ThreatAnalyzer:
         self.set_prolog_base_functions()
         self.threat_libraries = []
         self.undefined_properties = set()
-        self.errors = []
+        self.model_loading_errors = []
 
     def set_prolog_base_functions(self):
         self.query_engine.register_function('property',
@@ -161,7 +161,7 @@ class ThreatAnalyzer:
             components.remove(flow.target)
         for c in components:
             e = ThreatAnalysisError(c, 'component without flow')
-            self.errors.append(e)
+            self.model_loading_errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         self.query_engine.load_script_from_string(threat_library.get_python_source(), overwrite=False)
@@ -202,7 +202,7 @@ class ThreatAnalyzer:
         errors = [ self.make_error(i) for i in self.query_for_issues('error') ]
         threats = [ self.make_threat(i) for i in self.query_for_issues('threat') ]
         ar = AnalysisResult()
-        ar.add_errors(self.errors)
+        ar.add_errors(self.model_loading_errors)
         ar.add_errors(errors)
         ar.add_threats(threats)
         questions = self.make_questions_from_undefined_properties()

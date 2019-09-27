@@ -165,43 +165,94 @@ datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 """
     threatlib_threats_code = """
 % process with authentication::login is a threat
-threat(['test', '001', 0], [P], 'Test threat', 'This is a threat to test')
-    :- process(P), property(P,'authentication::login',yes).
+threat(['test', '001', 0], [X], 'Test threat', 'This is a threat to test')
+    :- process(X), property(X,'authentication::login',yes).
 % any flow is a threat
-threat(['test', '002', 0], [F], 'Another test', 'One more threat.')
-    :- dataflow(F)."""
+threat(['test', '002', 0], [X], 'Another test', 'One more threat.')
+    :- dataflow(X)."""
 
     threatlib_errors_code = """
 % any datastore is an error
-error(['test', '001', 0], [S], 'Error test', 'An error.') :- datastore(S).
+error(['test', '001', 0], [X], 'Error test', 'An error.') :- datastore(X).
 """
+
+    threatlib_extra_errors_code = """
+% any process is an error
+error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process(X).
+"""
+
+    def add_threat_library_from_source(self, analyzer, source):
+        t = ThreatLibrary()
+        t.from_string(source)
+        analyzer.add_threat_library(t)
 
     def test_model_threats_multiple_libraries(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
 
-        t1 = ThreatLibrary()
-        t1.from_string(self.threatlib_base_code)
-        a.add_threat_library(t1)
-
-        t2 = ThreatLibrary()
-        t2.from_string(self.threatlib_threats_code)
-        a.add_threat_library(t2)
-
-        t3 = ThreatLibrary()
-        t3.from_string(self.threatlib_errors_code)
-        a.add_threat_library(t3)
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_threats_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
 
         r = a.analyze()
         self.assertEqual(len(r.get_threats()), 1)
         self.assertEqual(len(r.get_questions()), 1)
         self.assertEqual(len(r.get_errors()), 1)
 
-    # must clear errors, threats, questions etc. between analyses
-    # ensure that errors, threats and questions are sorted
     # loading multiple threat libraries should not overwrite definitions
-    # test that templating works in threats and error messages
+    def test_model_analyze_with_extra_library(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_threats_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+        self.add_threat_library_from_source(a, self.threatlib_extra_errors_code)
+
+        r = a.analyze()
+        self.assertEqual(len(r.get_threats()), 1)
+        self.assertEqual(len(r.get_questions()), 1)
+        self.assertEqual(len(r.get_errors()), 2)
+
     # errors should include components without flows
+    def test_model_analyze_components_without_flows(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_without_flows)
+        r = a.analyze()
+        self.assertEqual(r.get_threats(), [])
+        self.assertEqual(r.get_questions(), [])
+        self.assertEqual(len(r.get_errors()), 2)
+
+
+
+    # must clear errors, threats, questions etc. between analyses
+    def test_model_analyze_again_with_extra_library(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_threats_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+
+        r = a.analyze()
+        self.add_threat_library_from_source(a, self.threatlib_extra_errors_code)
+        r = a.analyze()
+        self.assertEqual(len(r.get_threats()), 1)
+        self.assertEqual(len(r.get_questions()), 1)
+        self.assertEqual(len(r.get_errors()), 2)
+
+    def test_model_analyze_components_without_flows_twice(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_without_flows)
+        r = a.analyze()
+        r = a.analyze()
+        self.assertEqual(r.get_threats(), [])
+        self.assertEqual(r.get_questions(), [])
+        self.assertEqual(len(r.get_errors()), 2)
+
+
+    # ensure that errors, threats and questions are sorted
+    # test that templating works in threats and error messages
     # test that invalid libraries throw exception, TODO: how do we handle this?
 
 if __name__ == "__main__":

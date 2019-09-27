@@ -164,7 +164,7 @@ class ThreatAnalyzer:
             self.errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
-        self.query_engine.load_script_from_string(threat_library.get_python_source())
+        self.query_engine.load_script_from_string(threat_library.get_python_source(), overwrite=False)
 
     def query_for_issues(self, issue_type):
         v_issue = self.query_engine.variable()
@@ -202,6 +202,7 @@ class ThreatAnalyzer:
         errors = [ self.make_error(i) for i in self.query_for_issues('error') ]
         threats = [ self.make_threat(i) for i in self.query_for_issues('threat') ]
         ar = AnalysisResult()
+        ar.add_errors(self.errors)
         ar.add_errors(errors)
         ar.add_threats(threats)
         questions = self.make_questions_from_undefined_properties()

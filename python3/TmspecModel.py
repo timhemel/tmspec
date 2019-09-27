@@ -97,6 +97,9 @@ class TmspecModel:
     def get_identifier(self, identifier):
         return self.identifiers.get(identifier)
 
+    def get_types(self):
+        return self.types.values()
+
     def add_zone(self, zone):
         self.zones.add(zone)
         self.identifiers[zone.name] = zone

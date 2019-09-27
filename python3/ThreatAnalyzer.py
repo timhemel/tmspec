@@ -91,6 +91,12 @@ class ThreatAnalyzer:
         a_value = self.query_engine.atom(value)
         self.query_engine.assert_fact(c_property, [a_element, a_key, a_value])
 
+    def add_clause_type(self, tmtype):
+        c_type = self.query_engine.atom('type')
+        a_name = self.query_engine.atom(tmtype.name)
+        a_tmtype = self.query_engine.atom(tmtype)
+        self.query_engine.assert_fact(c_type, [a_name, a_tmtype])
+
     def add_element_types(self, element):
         for element_type in element.get_types():
             self.add_clause_element(element, element_type)
@@ -100,6 +106,8 @@ class ThreatAnalyzer:
             self.add_clause_prop(element, key, value)
 
     def add_prolog_facts_from_model(self):
+        for tmtype in self.model.get_types():
+            self.add_clause_type(tmtype)
         components = set()
         for z in self.model.get_zones():
             for component in self.model.get_zone_components(z):

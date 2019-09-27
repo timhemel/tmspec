@@ -109,6 +109,18 @@ flow store_info(encryptedflow): webapp --> database, pii;
         flows = self.dfd_with_flows.get_flows()
         self.assertEqual(r, [[flows[0], True]])
 
+    def test_model_types_defined(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        name = a.variable()
+        tmtype = a.variable()
+        const_key = a.atom('https')
+        q = a.query('type', [name, tmtype])
+        r = [[to_python(name), to_python(tmtype)] for _ in q]
+        types = self.dfd_with_flows.get_types()
+        self.assertEqual(r, [[t.name, t] for t in types])
+
+
     def test_error_component_without_flow(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_without_flows)

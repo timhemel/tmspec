@@ -193,6 +193,30 @@ component login(encryptedstore): zone=outside;
 """)
         self.assertEqual(model.components['login'].get_attr('encryption'), True)
 
+    def test_component_derived_type_has_direct_parents_only(self):
+        model = parseString("""
+version 0.0;
+type encryptedstore(datastore): encryption;
+type secretstore(encryptedstore): sensitive;
+zone outside;
+component login(secretstore): zone=outside;
+""")
+        types = model.components['login'].get_types()
+        self.assertEqual([t.name for t in types], ['secretstore'])
+
+    def test_component_type_has_multiple_direct_parents(self):
+        model = parseString("""
+version 0.0;
+type encryptedstore(datastore): encryption;
+type privatestore(datastore): pii;
+zone outside;
+component login(encryptedstore,privatestore): zone=outside;
+""")
+        types = model.components['login'].get_types()
+        self.assertEqual([t.name for t in types], ['encryptedstore', 'privatestore'])
+
+
+
     def test_component_cannot_be_flow(self):
         with self.assertRaises(TmspecErrorInvalidType):
             model = parseString("""

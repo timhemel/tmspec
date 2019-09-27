@@ -142,7 +142,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_without_flows)
         self.assertEqual(len(a.get_model_loading_errors()),2)
-        self.assertEqual(a.get_model_loading_errors()[0].message,
+        self.assertEqual(a.get_model_loading_errors()[0].get_short_description(),
                 'component without flow')
         webapp = self.find_component_by_name(self.dfd_without_flows, 'webapp')
         self.assertEqual(a.get_model_loading_errors()[0].get_position(), webapp.get_position())
@@ -178,7 +178,7 @@ datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 threat(['test', '001', 0], [X], 'Test threat', 'This is a threat to test')
     :- process(X), property(X,'authentication::login',yes).
 % any flow is a threat
-threat(['test', '002', 0], [X], 'threat to $v1', 'One more threat.')
+threat(['test', '002', 0], [X], 'threat to $v1', 'One more threat (on $v1).')
     :- dataflow(X)."""
 
     threatlib_errors_code = """
@@ -260,8 +260,8 @@ error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process
         self.assertEqual(r.get_questions(), [])
         self.assertEqual(len(r.get_errors()), 2)
 
-    # test that templating works in threats and error messages
-    def test_model_result_message_templating(self):
+    # test that templating works in short description of threats and errors
+    def test_model_result_short_descr_templating(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
 
@@ -272,8 +272,23 @@ error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process
         r = a.analyze()
         threat = r.get_threats()[0]
         flow = self.dfd_with_flows.get_flows()[0]
-        self.assertRegex(threat.get_rendered_message(), flow.name)
+        self.assertRegex(threat.get_short_description(), flow.name)
 
+    def test_reporting_interface(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_threats_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+
+        r = a.analyze()
+        threat = r.get_threats()[0]
+        flow = self.dfd_with_flows.get_flows()[0]
+        self.assertRegex(threat.get_short_description(), flow.name)
+        self.assertEqual(threat.get_position(), flow.get_position())
+        self.assertIsNotNone(threat.get_long_description())
+        self.assertRegex(threat.get_long_description(), flow.name)
 
 
     # ensure that errors, threats and questions are sorted

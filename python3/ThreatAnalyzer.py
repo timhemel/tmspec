@@ -6,26 +6,37 @@ from yldprolog.engine import Atom
 
 class ThreatAnalysisResultItem:
 
-    def __init__(self, elements, message):
+    def __init__(self, elements, short_description, long_description):
         """A result item from the analysis.
         elements are the elements to which the item applies (the first element
         is used to report the position in the input.
-        message is a string with the item message and can have references
-        to elements via template placeholders $v1, $v2, etc."""
+        short_description is a string with a short description (one line) and
+        can have references to elements via template placeholders $v1, $v2,
+        etc."""
 
-        self.message = message
+        self.short_description = short_description
+        self.long_description = long_description
         self.elements = elements
 
     def get_position(self):
         return self.elements[0].get_position()
 
-    def get_rendered_message(self):
-        """returns the message, but replaces any template placeholders with
-        element names."""
+    def replace_template_variables(self, text):
         var_lookup = dict([('v'+str(i+1), e.name)
             for i, e in enumerate(self.elements)])
-        s = Template(self.message).safe_substitute(var_lookup)
+        s = Template(text).safe_substitute(var_lookup)
         return s
+
+    def get_short_description(self):
+        """returns the short description and replaces any template
+        placeholders with element names."""
+        return self.replace_template_variables(self.short_description)
+
+    def get_long_description(self):
+        """returns the long description and replaces any template
+        placeholders with element names."""
+        return self.replace_template_variables(self.long_description)
+
 
 
 class ThreatAnalysisError(ThreatAnalysisResultItem):
@@ -173,7 +184,7 @@ class ThreatAnalyzer:
             components.discard(flow.source)
             components.discard(flow.target)
         for c in components:
-            e = ThreatAnalysisError([c], 'component without flow')
+            e = ThreatAnalysisError([c], 'component without flow', '''Component $v1 does not have any incoming or outgoing flows.''')
             self.model_loading_errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
@@ -193,22 +204,23 @@ class ThreatAnalyzer:
     def make_error(self, results):
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
-        message = "ERROR %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisError(elements, message)
+        # message = "ERROR %s: %s" % (error_code, short_desc)
+        error = ThreatAnalysisError(elements, short_desc, long_desc)
         return error
 
     def make_threat(self, results):
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
-        message = "THREAT %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisThreat(elements, message)
+        # message = "THREAT %s: %s" % (error_code, short_desc)
+        error = ThreatAnalysisThreat(elements, short_desc, long_desc)
         return error
 
     def make_questions_from_undefined_properties(self):
         questions = []
         for element, prop in self.undefined_properties:
-            message = "QUESTION: undefined property: %s" % prop
-            questions.append(ThreatAnalysisQuestion([element], message))
+            short_descr = "undefined property: %s" % prop
+            questions.append(ThreatAnalysisQuestion([element], short_descr,
+                '''The property %s is not defined on element $v1.''' % prop))
         return questions
 
     def analyze(self):

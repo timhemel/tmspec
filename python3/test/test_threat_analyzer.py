@@ -156,60 +156,53 @@ flow store_info(encryptedflow): webapp --> database, pii;
         self.assertEqual(r.get_threats(), [])
         self.assertEqual(r.get_questions(), [])
 
-    def test_model_threats_multiple_libraries(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        t1 = ThreatLibrary()
-        t1.from_string("""
+    threatlib_base_code = """
 isoftype(T,T).
 isoftype(T1,T2) :- subtype(T1,T), isoftype(T,T2).
 process(X) :- type(process,TP), element(X,T), isoftype(T,TP).
 dataflow(X) :- type(dataflow,TF), element(X,T), isoftype(T,TF).
-""")
-        a.add_threat_library(t1)
-        print(t1.get_python_source())
-
-        v1 = a.variable()
-        v2 = a.variable()
-        q = a.query('element', [ v1, v2 ])
-        r = [ (to_python(v1), to_python(v2)) for _ in q]
-        print('element', r)
-
-        q = a.query('dataflow', [ v1 ])
-        r = [to_python(v1) for _ in q]
-        print('dataflow', r)
-
-
-        t2 = ThreatLibrary()
-        t2.from_string("""
+datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
+"""
+    threatlib_threats_code = """
+% process with authentication::login is a threat
 threat(['test', '001', 0], [P], 'Test threat', 'This is a threat to test')
     :- process(P), property(P,'authentication::login',yes).
+% any flow is a threat
 threat(['test', '002', 0], [F], 'Another test', 'One more threat.')
-    :- dataflow(F).""")
+    :- dataflow(F)."""
+
+    threatlib_errors_code = """
+% any datastore is an error
+error(['test', '001', 0], [S], 'Error test', 'An error.') :- datastore(S).
+"""
+
+    def test_model_threats_multiple_libraries(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+
+        t1 = ThreatLibrary()
+        t1.from_string(self.threatlib_base_code)
+        a.add_threat_library(t1)
+
+        t2 = ThreatLibrary()
+        t2.from_string(self.threatlib_threats_code)
         a.add_threat_library(t2)
-        # print(t2.get_python_source())
 
-        v_threat = a.variable()
-        v_elements = a.variable()
-        v_short_desc = a.variable()
-        v_long_desc = a.variable()
-
-
-        q = a.query('threat', [
-            v_threat, v_elements, v_short_desc, v_long_desc ])
-        r = [(v_threat, v_elements, v_short_desc, v_long_desc) for r in q]
-        print('r==', r)
-
+        t3 = ThreatLibrary()
+        t3.from_string(self.threatlib_errors_code)
+        a.add_threat_library(t3)
 
         r = a.analyze()
         self.assertEqual(len(r.get_threats()), 1)
         self.assertEqual(len(r.get_questions()), 1)
-        self.assertEqual(r.get_errors(), [])
+        self.assertEqual(len(r.get_errors()), 1)
 
     # must clear errors, threats, questions etc. between analyses
     # ensure that errors, threats and questions are sorted
     # loading multiple threat libraries should not overwrite definitions
     # test that templating works in threats and error messages
+    # errors should include components without flows
+    # test that invalid libraries throw exception, TODO: how do we handle this?
 
 if __name__ == "__main__":
     unittest.main()

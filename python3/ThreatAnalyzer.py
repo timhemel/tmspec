@@ -3,24 +3,56 @@ import yldprolog.engine
 from yldprolog.engine import get_value, to_python
 from yldprolog.engine import Atom
 
-class ThreatAnalysisError:
+class ThreatAnalysisResultItem:
 
     def __init__(self, element, message):
-        """An error during the analysis. element is the element for which
-        the error is raised (multiple elements is not possible, because we
-        want one (line, column) pair for error reporting).
-        message is a string with the error message."""
+        """A result item from the analysis.
+        element is the element to which the item applies (only one element
+        can be used, because we want to report only one position in the input
+        message is a string with the item message."""
 
         self.message = message
         self.element = element
 
+
+class ThreatAnalysisError(ThreatAnalysisResultItem):
+
+    pass
+
+class ThreatAnalysisThreat(ThreatAnalysisResultItem):
+
+    pass
+
+class ThreatAnalysisQuestion(ThreatAnalysisResultItem):
+
+    pass
+
+
+
 class AnalysisResult:
 
+    def __init__(self):
+        self.errors = []
+        self.threats = []
+        self.questions = []
+
+    def get_errors(self):
+        return self.errors
+
     def get_threats(self):
-        return []
+        return self.threats
 
     def get_questions(self):
-        return []
+        return self.questions
+
+    def add_errors(self, errors):
+        self.errors += errors
+
+    def add_threats(self, threats):
+        self.threats += threats
+
+    def add_questions(self, questions):
+        self.questions += questions
 
 class ThreatAnalyzer:
 
@@ -127,41 +159,52 @@ class ThreatAnalyzer:
             self.add_element_properties(flow)
             components.remove(flow.source)
             components.remove(flow.target)
-            # print(flow.name, flow.source, flow.target, flow.get_attributes())
         for c in components:
             e = ThreatAnalysisError(c, 'component without flow')
             self.errors.append(e)
-        
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         self.query_engine.load_script_from_string(threat_library.get_python_source())
 
-    def analyze_errors(self):
-        v_error = self.query_engine.variable()
+    def query_for_issues(self, issue_type):
+        v_issue = self.query_engine.variable()
         v_elements = self.query_engine.variable()
         v_short_desc = self.query_engine.variable()
         v_long_desc = self.query_engine.variable()
-        q = self.query_engine.query('error', [
-            v_error, v_elements, v_short_desc, v_long_desc ])
-        for r in q:
-            print(v_error, v_elements, v_short_desc, v_long_desc)
-
-    def analyze_threats(self):
-        v_threat = self.query_engine.variable()
-        v_elements = self.query_engine.variable()
-        v_short_desc = self.query_engine.variable()
-        v_long_desc = self.query_engine.variable()
-        # print(self.query_engine.eval_context)
-        print([v_threat, v_elements, v_short_desc, v_long_desc])
-        q = self.query_engine.query('threat', [
-            v_threat, v_elements, v_short_desc, v_long_desc ])
-
-        r = [(v_threat, v_elements, v_short_desc, v_long_desc) for r in q]
-        print('r=',r)
+        q = self.query_engine.query(issue_type, [
+            v_issue, v_elements, v_short_desc, v_long_desc ])
+        r = [list(map(to_python,
+            [v_issue, v_elements, v_short_desc, v_long_desc])) for r in q]
         return r
 
+    def make_error(self, results):
+        issue_id, elements, short_desc, long_desc = results
+        error_code = "%s-%s-%d" % tuple(issue_id)
+        message = "ERROR %s: %s" % (error_code, short_desc)
+        error = ThreatAnalysisError(elements[0], message)
+        return error
+
+    def make_threat(self, results):
+        issue_id, elements, short_desc, long_desc = results
+        error_code = "%s-%s-%d" % tuple(issue_id)
+        message = "THREAT %s: %s" % (error_code, short_desc)
+        error = ThreatAnalysisThreat(elements[0], message)
+        return error
+
+    def make_questions_from_undefined_properties(self):
+        questions = []
+        for element, prop in self.undefined_properties:
+            message = "QUESTION: undefined property: %s" % prop
+            questions.append(ThreatAnalysisQuestion(element, message))
+        return questions
+
     def analyze(self):
-        errors = self.analyze_errors()
-        threats = self.analyze_threats()
-        return AnalysisResult()
+        errors = [ self.make_error(i) for i in self.query_for_issues('error') ]
+        threats = [ self.make_threat(i) for i in self.query_for_issues('threat') ]
+        ar = AnalysisResult()
+        ar.add_errors(errors)
+        ar.add_threats(threats)
+        questions = self.make_questions_from_undefined_properties()
+        ar.add_questions(questions)
+        return ar
 

@@ -287,8 +287,9 @@ error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process
         flow = self.dfd_with_flows.get_flows()[0]
         self.assertRegex(threat.get_short_description(), flow.name)
         self.assertEqual(threat.get_position(), flow.get_position())
-        self.assertIsNotNone(threat.get_long_description())
         self.assertRegex(threat.get_long_description(), flow.name)
+        self.assertEqual(threat.get_id(), 'test-002-0')
+        self.assertEqual(threat.get_elements(), [flow])
 
 
     # ensure that errors, threats and questions are sorted

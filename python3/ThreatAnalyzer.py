@@ -6,7 +6,8 @@ from yldprolog.engine import Atom
 
 class ThreatAnalysisResultItem:
 
-    def __init__(self, elements, short_description, long_description):
+    def __init__(self, result_id, elements, short_description,
+            long_description):
         """A result item from the analysis.
         elements are the elements to which the item applies (the first element
         is used to report the position in the input.
@@ -14,9 +15,19 @@ class ThreatAnalysisResultItem:
         can have references to elements via template placeholders $v1, $v2,
         etc."""
 
+        self.result_id = result_id
         self.short_description = short_description
         self.long_description = long_description
         self.elements = elements
+
+    def get_id(self):
+        """returns a result item identifier to refer to the result item
+        or its type."""
+        return self.result_id
+
+    def get_elements(self):
+        """gives all elements to which the result item applies."""
+        return self.elements
 
     def get_position(self):
         return self.elements[0].get_position()
@@ -184,7 +195,7 @@ class ThreatAnalyzer:
             components.discard(flow.source)
             components.discard(flow.target)
         for c in components:
-            e = ThreatAnalysisError([c], 'component without flow', '''Component $v1 does not have any incoming or outgoing flows.''')
+            e = ThreatAnalysisError('COMPNOFLOW', [c], 'component without flow', '''Component $v1 does not have any incoming or outgoing flows.''')
             self.model_loading_errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
@@ -205,21 +216,21 @@ class ThreatAnalyzer:
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
         # message = "ERROR %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisError(elements, short_desc, long_desc)
+        error = ThreatAnalysisError(error_code, elements, short_desc, long_desc)
         return error
 
     def make_threat(self, results):
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
         # message = "THREAT %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisThreat(elements, short_desc, long_desc)
+        error = ThreatAnalysisThreat(error_code, elements, short_desc, long_desc)
         return error
 
     def make_questions_from_undefined_properties(self):
         questions = []
         for element, prop in self.undefined_properties:
             short_descr = "undefined property: %s" % prop
-            questions.append(ThreatAnalysisQuestion([element], short_descr,
+            questions.append(ThreatAnalysisQuestion('PROPUNDEF', [element], short_descr,
                 '''The property %s is not defined on element $v1.''' % prop))
         return questions
 

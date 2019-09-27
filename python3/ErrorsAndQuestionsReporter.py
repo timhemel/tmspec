@@ -11,7 +11,10 @@ class ErrorsAndQuestionsReporter:
                 result_type = 'ERROR'
             elif isinstance(r, ThreatAnalysisQuestion):
                 result_type = 'QUESTION'
-            message = '%s %s: %s' % (result_type, r.get_id(), r.get_short_description())
+            long_descr = "\n".join(['   '+l
+                for l in r.get_long_description().splitlines()])
+            message = '%s %s: %s\n%s' % (result_type, r.get_id(),
+                r.get_short_description(), long_descr)
             return "%s:%d:%d:%s" % (filename, line, column, message)
         items = sorted(results.get_errors() + results.get_questions(), key=
                 lambda x: (x.get_filename(), x.get_position()))

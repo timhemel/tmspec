@@ -55,10 +55,10 @@ class TmToolApp:
             results = a.analyze()
             # write threats to stdout
             threat_report = JSONThreatsReporter(results).get()
-            sys.stdout.write(threat_report)
+            sys.stdout.write(threat_report+'\n')
             # write errors & questions to stderr
             error_report = ErrorsAndQuestionsReporter(results).get()
-            sys.stderr.write(error_report)
+            sys.stderr.write(error_report+'\n')
         except TmspecError as e:
             print(e)
 

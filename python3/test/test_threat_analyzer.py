@@ -273,9 +273,6 @@ error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process
         threat = r.get_threats()[0]
         flow = self.dfd_with_flows.get_flows()[0]
         self.assertRegex(threat.get_rendered_message(), flow.name)
-        # self.assertEqual(len(r.get_threats()), 1)
-        # self.assertEqual(len(r.get_questions()), 1)
-        # self.assertEqual(len(r.get_errors()), 1)
 
 
 

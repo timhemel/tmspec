@@ -7,6 +7,8 @@ from TmspecParser import *
 from ThreatAnalyzer import ThreatAnalyzer
 from ThreatLibrary import ThreatLibrary
 from GraphvizDFDRenderer import *
+from JSONThreatsReporter import JSONThreatsReporter
+from ErrorsAndQuestionsReporter import ErrorsAndQuestionsReporter
 
 class TmToolApp:
     def __init__(self):
@@ -20,7 +22,7 @@ class TmToolApp:
         parser.add_argument('-i', '--input', action='store',
             help='load threatmodel from INPUT')
         parser.add_argument('-t', '--threats', action='append',
-            help='load threats from THREATS')
+            default=[], help='load threats from THREATS')
 
         self.args = parser.parse_args()
         print(self.args)
@@ -51,6 +53,12 @@ class TmToolApp:
                 t.from_prolog_file(p)
                 a.add_threat_library(t)
             results = a.analyze()
+            # write threats to stdout
+            threat_report = JSONThreatsReporter(results).get()
+            sys.stdout.write(threat_report)
+            # write errors & questions to stderr
+            error_report = ErrorsAndQuestionsReporter(results).get()
+            sys.stderr.write(error_report)
         except TmspecError as e:
             print(e)
 

@@ -29,7 +29,7 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
         return self.undefined_properties
 
     def get_model_loading_errors(self):
-        return sorted(self.model_loading_errors, key=lambda x: x.element.get_position())
+        return sorted(self.model_loading_errors, key=lambda x: x.elements[0].get_position())
 
 class TestThreatAnalyzer(unittest.TestCase):
 
@@ -129,6 +129,14 @@ flow store_info(encryptedflow): webapp --> database, pii;
         tmtype = self.dfd_with_flows.get_flows()[0].get_types()[0]
         self.assertEqual(r, [[tmtype, t] for t in tmtype.get_types()])
 
+    def find_component_by_name(self, model, name):
+        l = [
+            c for z in model.get_zones()
+            for c in model.get_zone_components(z)
+            if c.name == name ]
+        if l == []:
+            return None
+        return l[0]
 
     def test_error_component_without_flow(self):
         a = FTOThreatAnalyzer()
@@ -136,8 +144,8 @@ flow store_info(encryptedflow): webapp --> database, pii;
         self.assertEqual(len(a.get_model_loading_errors()),2)
         self.assertEqual(a.get_model_loading_errors()[0].message,
                 'component without flow')
-        self.assertEqual(a.get_model_loading_errors()[0].element.name,
-                'webapp')
+        webapp = self.find_component_by_name(self.dfd_without_flows, 'webapp')
+        self.assertEqual(a.get_model_loading_errors()[0].get_position(), webapp.get_position())
 
     def test_analyzer_loads_script(self):
         a = FTOThreatAnalyzer()
@@ -170,7 +178,7 @@ datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 threat(['test', '001', 0], [X], 'Test threat', 'This is a threat to test')
     :- process(X), property(X,'authentication::login',yes).
 % any flow is a threat
-threat(['test', '002', 0], [X], 'Another test', 'One more threat.')
+threat(['test', '002', 0], [X], 'threat to $v1', 'One more threat.')
     :- dataflow(X)."""
 
     threatlib_errors_code = """
@@ -252,9 +260,26 @@ error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process
         self.assertEqual(r.get_questions(), [])
         self.assertEqual(len(r.get_errors()), 2)
 
+    # test that templating works in threats and error messages
+    def test_model_result_message_templating(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_threats_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+
+        r = a.analyze()
+        threat = r.get_threats()[0]
+        flow = self.dfd_with_flows.get_flows()[0]
+        self.assertRegex(threat.get_rendered_message(), flow.name)
+        # self.assertEqual(len(r.get_threats()), 1)
+        # self.assertEqual(len(r.get_questions()), 1)
+        # self.assertEqual(len(r.get_errors()), 1)
+
+
 
     # ensure that errors, threats and questions are sorted
-    # test that templating works in threats and error messages
     # test that invalid libraries throw exception, TODO: how do we handle this?
 
 if __name__ == "__main__":

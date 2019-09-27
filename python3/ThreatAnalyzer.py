@@ -1,18 +1,31 @@
 
+from string import Template
 import yldprolog.engine
 from yldprolog.engine import get_value, to_python
 from yldprolog.engine import Atom
 
 class ThreatAnalysisResultItem:
 
-    def __init__(self, element, message):
+    def __init__(self, elements, message):
         """A result item from the analysis.
-        element is the element to which the item applies (only one element
-        can be used, because we want to report only one position in the input
-        message is a string with the item message."""
+        elements are the elements to which the item applies (the first element
+        is used to report the position in the input.
+        message is a string with the item message and can have references
+        to elements via template placeholders $v1, $v2, etc."""
 
         self.message = message
-        self.element = element
+        self.elements = elements
+
+    def get_position(self):
+        return self.elements[0].get_position()
+
+    def get_rendered_message(self):
+        """returns the message, but replaces any template placeholders with
+        element names."""
+        var_lookup = dict([('v'+str(i+1), e.name)
+            for i, e in enumerate(self.elements)])
+        s = Template(self.message).safe_substitute(var_lookup)
+        return s
 
 
 class ThreatAnalysisError(ThreatAnalysisResultItem):
@@ -160,7 +173,7 @@ class ThreatAnalyzer:
             components.remove(flow.source)
             components.remove(flow.target)
         for c in components:
-            e = ThreatAnalysisError(c, 'component without flow')
+            e = ThreatAnalysisError([c], 'component without flow')
             self.model_loading_errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
@@ -181,21 +194,21 @@ class ThreatAnalyzer:
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
         message = "ERROR %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisError(elements[0], message)
+        error = ThreatAnalysisError(elements, message)
         return error
 
     def make_threat(self, results):
         issue_id, elements, short_desc, long_desc = results
         error_code = "%s-%s-%d" % tuple(issue_id)
         message = "THREAT %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisThreat(elements[0], message)
+        error = ThreatAnalysisThreat(elements, message)
         return error
 
     def make_questions_from_undefined_properties(self):
         questions = []
         for element, prop in self.undefined_properties:
             message = "QUESTION: undefined property: %s" % prop
-            questions.append(ThreatAnalysisQuestion(element, message))
+            questions.append(ThreatAnalysisQuestion([element], message))
         return questions
 
     def analyze(self):

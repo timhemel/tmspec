@@ -1,14 +1,16 @@
 
 class TmspecInputContext:
-    def __init__(self, line, column):
-        # TODO: filename?
+    def __init__(self, filename, line, column):
+        self.filename = filename
         self.line = line
         self.column = column
     def get_position(self):
         return self.line, self.column
+    def get_filename(self):
+        return self.filename
 
-def parse_context_to_input_context(ctx):
-    return TmspecInputContext(ctx.start.line, ctx.start.column)
+def parse_context_to_input_context(filename, ctx):
+    return TmspecInputContext(filename, ctx.start.line, ctx.start.column)
 
 class TmspecError(Exception):
     def __init__(self, msg, ctx):

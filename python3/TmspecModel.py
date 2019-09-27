@@ -15,6 +15,9 @@ class TmElementWithAttributes(TmElement):
     def get_position(self):
         return self.input_ctx.get_position()
 
+    def get_filename(self):
+        return self.input_ctx.get_filename()
+
     def get_attr(self, key):
         try:
             return self.attr[key]

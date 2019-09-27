@@ -3,6 +3,7 @@ from antlr4 import *
 
 import sys
 sys.path.insert(0, '..')
+# TODO: remove this?
 from tmspecLexer import *
 from tmspecParser import *
 from TmspecError import *
@@ -14,7 +15,8 @@ class ExceptionErrorListener(ErrorListener):
         raise TmspecErrorParseError(msg, TmspecInputContext(line, column))
 
 
-def _get_parse_tree(inp):
+def _get_parse_tree(inp, filename):
+    # TODO: add filename to lexer and parser...
     error_listener = ExceptionErrorListener()
     lexer = tmspecLexer(inp)
     lexer.removeErrorListeners()
@@ -26,26 +28,26 @@ def _get_parse_tree(inp):
     tree = parser.start()
     return tree
 
-def _get_model(tree):
-    visitor = TmspecModelVisitor()
+def _get_model(tree, filename):
+    visitor = TmspecModelVisitor(filename)
     model = visitor.visit(tree)
     return model
 
-def _parseStream(inp):
-    tree = _get_parse_tree(inp)
-    model = _get_model(tree)
+def _parseStream(inp, filename):
+    tree = _get_parse_tree(inp, filename)
+    model = _get_model(tree, filename)
     return model
 
 def parseFile(fn):
     inp = FileStream(fn)
-    return _parseStream(inp)
+    return _parseStream(inp, str(fn))
 
 def parseString(data):
     inp = InputStream(data)
-    return _parseStream(inp)
+    return _parseStream(inp, '<string>')
 
 def parseStdin():
     inp = StdinStream()
-    return _parseStream(inp)
+    return _parseStream(inp, '<stdin>')
 
 

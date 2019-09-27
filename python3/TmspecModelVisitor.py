@@ -35,14 +35,14 @@ def unquote_string(s):
     return r
 
 def get_context_position(ctx):
-    print(dir(ctx))
     return ctx.line, ctx.column
 
 class TmspecModelVisitor(tmspecVisitor):
 
-    def __init__(self):
+    def __init__(self, filename):
         super(TmspecModelVisitor, self).__init__()
         self.model = TmspecModel()
+        self.filename = filename
 
     def visitStart(self, ctx):
         self.visitChildren(ctx)
@@ -50,11 +50,11 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitZone(self, ctx):
         zone_name = ctx.identifier().getText()
-        zone_ctx = parse_context_to_input_context(ctx)
+        zone_ctx = parse_context_to_input_context(self.filename, ctx)
         if self.model.has_identifier(zone_name):
             raise TmspecErrorDuplicateIdentifier(
                 "identfier {} already in use.".format(zone_name),
-                parse_context_to_input_context(ctx.identifier()))
+                parse_context_to_input_context(self.filename, ctx.identifier()))
         if ctx.attributes():
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
@@ -64,7 +64,7 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitTypedef(self, ctx):
         type_name, type_parents = self.visitNameAndType(ctx.name_and_type(), None)
-        type_ctx = parse_context_to_input_context(ctx)
+        type_ctx = parse_context_to_input_context(self.filename, ctx)
         if ctx.attributes():
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
@@ -74,7 +74,7 @@ class TmspecModelVisitor(tmspecVisitor):
 
     def visitComponent(self, ctx):
         component_name, component_types = self.visitNameAndType(ctx.name_and_type(), ['datastore', 'process', 'externalentity'])
-        component_ctx = parse_context_to_input_context(ctx)
+        component_ctx = parse_context_to_input_context(self.filename, ctx)
         if ctx.attributes():
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
@@ -90,21 +90,21 @@ class TmspecModelVisitor(tmspecVisitor):
         if not component:
             raise TmspecErrorUnknownIdentifier(
                 "unknown identifier: {}".format(ctx.getText()),
-                parse_context_to_input_context(ctx))
+                parse_context_to_input_context(self.filename, ctx))
         base_types = [t.get_base_types() for t in component.get_types()]
         if 'dataflow' in base_types:
             raise TmspecErrorInvalidType(
                 "element {} is not a dataflow instance"
                 .format(ctx.getText()),
-                parse_context_to_input_context(ctx))
+                parse_context_to_input_context(self.filename, ctx))
 
     def visitFlow(self, ctx):
         name = ctx.identifier(0).getText()
-        flow_ctx = parse_context_to_input_context(ctx)
+        flow_ctx = parse_context_to_input_context(self.filename, ctx)
         if self.model.has_identifier(name):
             raise TmspecErrorDuplicateIdentifier(
                 "identifier {} already in use.".format(name),
-                parse_context_to_input_context(ctx.identifier(0)))
+                parse_context_to_input_context(self.filename, ctx.identifier(0)))
         if ctx.typing() is not None:
             types = self.visitTyping(ctx.typing(), ['dataflow'])
         else:
@@ -132,7 +132,7 @@ class TmspecModelVisitor(tmspecVisitor):
         if self.model.has_identifier(name):
             raise TmspecErrorDuplicateIdentifier(
                 "identifier {} already in use.".format(name),
-                parse_context_to_input_context(ctx.identifier()))
+                parse_context_to_input_context(self.filename, ctx.identifier()))
         types = self.visitTyping(ctx.typing(), type_restrictions)
         return (name, types)
 
@@ -144,11 +144,11 @@ class TmspecModelVisitor(tmspecVisitor):
             if not obj:
                 raise TmspecErrorUnknownIdentifier(
                     "unknown identifier: {}".format(c.getText()),
-                    parse_context_to_input_context(c))
+                    parse_context_to_input_context(self.filename, c))
             if not isinstance(obj, TmType):
                 raise TmspecErrorNotAType(
                     "{} is not a type".format(c.getText()),
-                    parse_context_to_input_context(c))
+                    parse_context_to_input_context(self.filename, c))
             if len(base_types) == 0:
                 base_types.update(obj.get_base_types())
                 base_type = list(base_types)[0]
@@ -160,11 +160,11 @@ class TmspecModelVisitor(tmspecVisitor):
                     "type {} derived from {}, but must be derived from {}"
                     .format(c.getText(), base_type,
                         ", ".join(type_restrictions)),
-                    parse_context_to_input_context(c))
+                    parse_context_to_input_context(self.filename, c))
             if len(base_types) > 1:
                 raise TmspecErrorConflictingTypes(
                     "type {} conflicts with {}".format(c.getText(), base_type),
-                    parse_context_to_input_context(c))
+                    parse_context_to_input_context(self.filename, c))
             types.append(obj)
         return types
 
@@ -188,7 +188,7 @@ class TmspecModelVisitor(tmspecVisitor):
             if obj is None:
                 raise TmspecErrorUnknownIdentifier(
                     "unknown identifier: {}".format(identifier),
-                    parse_context_to_input_context(ctx.identifier()))
+                    parse_context_to_input_context(self.filename, ctx.identifier()))
             return obj
         if ctx.QSTRING():
             return unquote_string(ctx.QSTRING().getText())

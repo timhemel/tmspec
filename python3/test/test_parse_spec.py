@@ -315,8 +315,32 @@ flow store_info(encryptedflow): webapp --> database, pii;
         types = [t.name for t in model.types['encryptedflow'].get_types()]
         self.assertEqual(types, ['dataflow'])
 
+    def test_element_has_position(self):
+        model = parseString("""
+version 0.0;
+type encryptedflow(dataflow): encryption;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
 
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
+        tmtype = model.types['encryptedflow']
+        print(tmtype.name)
+        self.assertEqual(tmtype.get_position(), (3, 0))
 
+    def test_element_has_filename_stdin(self):
+        model = parseString("""
+version 0.0;
+type encryptedflow(dataflow): encryption;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
+        tmtype = model.types['encryptedflow']
+        self.assertEqual(tmtype.get_filename(), '<string>')
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ class ThreatAnalysisResultItem:
         return self.elements
 
     def get_filename(self):
-        return "<stdin>"
+        return self.elements[0].get_filename()
 
     def get_position(self):
         return self.elements[0].get_position()

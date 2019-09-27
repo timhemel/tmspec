@@ -118,8 +118,34 @@ class ThreatAnalyzer:
         
 
     def add_prolog_rules_from_threat_library(self, threat_library):
-        pass
+        self.query_engine.load_script_from_string(threat_library.get_python_source())
+
+    def analyze_errors(self):
+        v_error = self.query_engine.variable()
+        v_elements = self.query_engine.variable()
+        v_short_desc = self.query_engine.variable()
+        v_long_desc = self.query_engine.variable()
+        q = self.query_engine.query('error', [
+            v_error, v_elements, v_short_desc, v_long_desc ])
+        for r in q:
+            print(v_error, v_elements, v_short_desc, v_long_desc)
+
+    def analyze_threats(self):
+        v_threat = self.query_engine.variable()
+        v_elements = self.query_engine.variable()
+        v_short_desc = self.query_engine.variable()
+        v_long_desc = self.query_engine.variable()
+        # print(self.query_engine.eval_context)
+        print([v_threat, v_elements, v_short_desc, v_long_desc])
+        q = self.query_engine.query('threat', [
+            v_threat, v_elements, v_short_desc, v_long_desc ])
+
+        r = [(v_threat, v_elements, v_short_desc, v_long_desc) for r in q]
+        print('r=',r)
+        return r
 
     def analyze(self):
+        errors = self.analyze_errors()
+        threats = self.analyze_threats()
         return AnalysisResult()
 

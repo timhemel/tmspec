@@ -29,6 +29,9 @@ class ThreatAnalysisResultItem:
         """gives all elements to which the result item applies."""
         return self.elements
 
+    def get_filename(self):
+        return "<stdin>"
+
     def get_position(self):
         return self.elements[0].get_position()
 

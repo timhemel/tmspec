@@ -170,8 +170,8 @@ class ThreatAnalyzer:
         for flow in self.model.get_flows():
             self.add_element_types(flow)
             self.add_element_properties(flow)
-            components.remove(flow.source)
-            components.remove(flow.target)
+            components.discard(flow.source)
+            components.discard(flow.target)
         for c in components:
             e = ThreatAnalysisError([c], 'component without flow')
             self.model_loading_errors.append(e)

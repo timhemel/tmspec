@@ -11,13 +11,18 @@ from TmspecModelVisitor import *
 
 class ExceptionErrorListener(ErrorListener):
 
+    def __init__(self, filename):
+        super().__init__()
+        self.filename = filename
+
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        raise TmspecErrorParseError(msg, TmspecInputContext(line, column))
+        raise TmspecErrorParseError(msg,
+            TmspecInputContext(self.filename, line, column))
 
 
 def _get_parse_tree(inp, filename):
     # TODO: add filename to lexer and parser...
-    error_listener = ExceptionErrorListener()
+    error_listener = ExceptionErrorListener(filename)
     lexer = tmspecLexer(inp)
     lexer.removeErrorListeners()
     lexer.addErrorListener(error_listener)

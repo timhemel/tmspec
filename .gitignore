@@ -148,3 +148,13 @@ tags
 
 # End of https://www.gitignore.io/api/vim,python
 
+# generated antlr4 files
+tmspec/tmspec.tokens
+tmspec/tmspecLexer.py
+tmspec/tmspecLexer.tokens
+tmspec/tmspecLexer.interp
+tmspec/tmspecParser.py
+tmspec/tmspecListener.py
+tmspec/tmspecVisitor.py
+tmspec/tmspec.interp
+

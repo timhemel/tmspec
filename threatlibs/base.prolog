@@ -27,7 +27,7 @@ error([modelcheck, DNOOUTFLOW, 0], [X], 'data store not read',
     datastore(X), \+ dataflow(_,X,_).
 
 error([modelcheck, DDIRECTFLOW, 0], [F,D1,D2], 'direct data store communication',
-   'Data cannot flow between two data stores directly, this requires a process.
-Please put a process between $v2 and $v3.') :-
+   'Data cannot flow between two data stores directly, this requires a process (or external entity).
+Please put a process (or external entity) between $v2 and $v3.') :-
     datastore(D1), datastore(D2), dataflow(F,D1,D2).
 

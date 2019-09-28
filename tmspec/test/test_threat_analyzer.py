@@ -98,7 +98,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         self.assertEqual(r, [])
         self.assertEqual(len(a.get_undefined_properties()), 1)
 
-    def test_model_query_flow_property(self):
+    def test_model_query_dataflow_has_property(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_with_flows)
         elt = a.variable()
@@ -108,6 +108,17 @@ flow store_info(encryptedflow): webapp --> database, pii;
         r = [[to_python(elt), to_python(value)] for _ in q]
         flows = self.dfd_with_flows.get_flows()
         self.assertEqual(r, [[flows[0], True]])
+
+    def test_model_query_flow_clause(self):
+        a = FTOThreatAnalyzer()
+        a.set_model(self.dfd_with_flows)
+        v_from = a.variable()
+        v_to = a.variable()
+        v_elt = a.variable()
+        q = a.query('flow', [v_elt, v_from, v_to])
+        r = [[to_python(v_elt), to_python(v_from), to_python(v_to)] for _ in q]
+        flows = self.dfd_with_flows.get_flows()
+        self.assertEqual(r, [[flows[0], flows[0].source, flows[0].target]])
 
     def test_model_types_defined(self):
         a = FTOThreatAnalyzer()

@@ -173,6 +173,13 @@ class ThreatAnalyzer:
         a_parent_type = self.query_engine.atom(parent_type)
         self.query_engine.assert_fact(c_subtype, [a_tmtype, a_parent_type])
 
+    def add_clause_flow(self, flow):
+        c_flow = self.query_engine.atom('flow')
+        a_flow = self.query_engine.atom(flow)
+        a_source = self.query_engine.atom(flow.source)
+        a_target = self.query_engine.atom(flow.target)
+        self.query_engine.assert_fact(c_flow, [a_flow, a_source, a_target])
+
     def add_element_types(self, element):
         for element_type in element.get_types():
             self.add_clause_element(element, element_type)
@@ -194,6 +201,7 @@ class ThreatAnalyzer:
                 components.add(component)
         for flow in self.model.get_flows():
             self.add_element_types(flow)
+            self.add_clause_flow(flow)
             self.add_element_properties(flow)
             components.discard(flow.source)
             components.discard(flow.target)

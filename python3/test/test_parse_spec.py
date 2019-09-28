@@ -20,6 +20,21 @@ component webapp(process): zone=outside, cookies;
         self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
         self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
 
+    def test_parse_comments(self):
+        model = parseString("""
+version 0.0;
+zone outside;
+# one line comment
+// other comment
+component webapp(process): /* todo */ zone=outside, cookies;
+""")
+        outside_zone = list(model.zones)[0]
+        types = [t.name for t in model.components['webapp'].get_types()]
+        self.assertEqual(types, ['process'])
+        self.assertEqual(model.components['webapp'].get_attr('cookies'), True)
+        self.assertEqual(model.components['webapp'].get_attr('zone'), outside_zone)
+
+
     def test_parse_attribute_types(self):
         model = parseString(r"""
 version 0.0;

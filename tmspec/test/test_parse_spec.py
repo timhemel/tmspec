@@ -1,6 +1,8 @@
 import unittest
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
+import tempfile
+import os
 
 from TmspecError import *
 from TmspecParser import *
@@ -343,7 +345,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         tmtype = model.types['encryptedflow']
         self.assertEqual(tmtype.get_position(), (3, 0))
 
-    def test_element_has_filename_stdin(self):
+    def test_element_has_filename_string(self):
         model = parseString("""
 version 0.0;
 type encryptedflow(dataflow): encryption;
@@ -355,6 +357,28 @@ flow store_info(encryptedflow): webapp --> database, pii;
 """)
         tmtype = model.types['encryptedflow']
         self.assertEqual(tmtype.get_filename(), '<string>')
+
+    def test_element_has_filename_file(self):
+        s = """
+version 0.0;
+type encryptedflow(dataflow): encryption;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+"""
+        # write s to a file
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+            print(s, file=f)
+            fn = f.name
+        try:
+            model = parseFile(f.name)
+        finally:
+            os.unlink(f.name)
+        tmtype = model.types['encryptedflow']
+        self.assertEqual(tmtype.get_filename(), fn)
+
 
 
 if __name__ == "__main__":

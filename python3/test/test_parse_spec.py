@@ -326,7 +326,6 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
         tmtype = model.types['encryptedflow']
-        print(tmtype.name)
         self.assertEqual(tmtype.get_position(), (3, 0))
 
     def test_element_has_filename_stdin(self):

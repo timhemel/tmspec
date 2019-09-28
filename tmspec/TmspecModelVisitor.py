@@ -172,7 +172,10 @@ class TmspecModelVisitor(tmspecVisitor):
         return [self.visitAttribute(c) for c in ctx.attribute()]
 
     def visitAttribute(self, ctx):
-        attr_name = ctx.identifier().getText()
+        if ctx.identifier():
+            attr_name = ctx.identifier().getText()
+        else:
+            attr_name = unquote_string(ctx.QSTRING().getText())
         if ctx.value():
             attr_value = self.visitValue(ctx.value())
         else:

@@ -12,7 +12,7 @@ declaration: component
 component: 'component' name_and_type ( ':' attributes )? ';' ;
 name_and_type: identifier typing ;
 attributes: attribute ( ',' attribute )*;
-attribute: identifier ( '=' value )? ;
+attribute: (identifier|QSTRING) ( '=' value )? ;
 typedef: 'type' name_and_type ( ':' attributes )? ';' ;
 zone: 'zone' identifier ( ':' attributes )? ';' ;
 versiondef: 'version' VERSION ';' ;

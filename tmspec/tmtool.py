@@ -2,6 +2,7 @@
 
 import argparse
 import pathlib
+from yldprolog.engine import to_python
 
 from TmspecParser import *
 from ThreatAnalyzer import ThreatAnalyzer
@@ -19,6 +20,9 @@ class TmToolApp:
         parser.add_argument('-a', '--analyze', dest='mode',
             action='store_const', const='analyze',
             help='analyze DFD against threat library')
+        parser.add_argument('-D', '--dump-clauses', dest='mode',
+            action='store_const', const='dump_clauses',
+            help='dump all Prolog clauses for DFD (i.e. translate to Prolog).')
         parser.add_argument('-i', '--input', action='store',
             help='load threatmodel from INPUT')
         parser.add_argument('-t', '--threats', action='append',
@@ -30,6 +34,8 @@ class TmToolApp:
             self._makeDFD()
         elif self.args.mode == 'analyze':
             self._analyze_dfd()
+        elif self.args.mode == 'dump_clauses':
+            self._dump_clauses()
     def _makeDFD(self):
         # --dfd -i <input> -o <output>
         try:
@@ -57,6 +63,19 @@ class TmToolApp:
             # write errors & questions to stderr
             error_report = ErrorsAndQuestionsReporter(results).get()
             print(error_report, file=sys.stderr)
+        except TmspecError as e:
+            print(e, file=sys.stderr)
+    def _dump_clauses(self):
+        try:
+            model = parseFile(self.args.input)
+            a = ThreatAnalyzer()
+            a.set_model(model)
+            for predicate, answers in a.query_engine._predicates_store.items():
+                print("%s/%d:" % predicate)
+                for answer in answers:
+                    values = ",".join(str(to_python(x)) for x in answer.values)
+                    print("%s(%s)." % (predicate[0], values))
+                print()
         except TmspecError as e:
             print(e, file=sys.stderr)
 

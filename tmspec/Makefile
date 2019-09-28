@@ -3,7 +3,7 @@
 
 compiler: tmspecVisitor.py
 
-tmspecVisitor.py: ../tmspec.g4
+tmspecVisitor.py: tmspec.g4
 	sh build.sh
 
 test:

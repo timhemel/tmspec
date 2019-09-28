@@ -25,7 +25,6 @@ class TmToolApp:
             default=[], help='load threats from THREATS')
 
         self.args = parser.parse_args()
-        print(self.args)
     def run(self):
         if self.args.mode == 'dfd':
             self._makeDFD()
@@ -37,13 +36,12 @@ class TmToolApp:
             model = parseFile(self.args.input)
             dot = GraphvizDFDRenderer(model).get_dot()
         except TmspecError as e:
-            print(e)
+            print(e, file=sys.stderr)
 
     def _analyze_dfd(self):
         # --analyze -t threats1 -t threats2 -i <input>
         try:
             model = parseFile(self.args.input)
-            print(model)
             a = ThreatAnalyzer()
             a.set_model(model)
             for tfn in self.args.threats:
@@ -55,12 +53,12 @@ class TmToolApp:
             results = a.analyze()
             # write threats to stdout
             threat_report = JSONThreatsReporter(results).get()
-            sys.stdout.write(threat_report+'\n')
+            print(threat_report, file=sys.stdout)
             # write errors & questions to stderr
             error_report = ErrorsAndQuestionsReporter(results).get()
-            sys.stderr.write(error_report+'\n')
+            print(error_report, file=sys.stderr)
         except TmspecError as e:
-            print(e)
+            print(e, file=sys.stderr)
 
 if __name__ == "__main__":
     TmToolApp().run()

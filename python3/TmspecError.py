@@ -22,7 +22,7 @@ class TmspecError(Exception):
         return self.context.column
 
     def __str__(self):
-        return "ERROR:%d:%d:%s" % (self.context.line, self.context.column, self.msg)
+        return "%s:%d:%d:ERROR: %s" % (self.context.filename, self.context.line, self.context.column, self.msg)
 
 class TmspecErrorDuplicateIdentifier(TmspecError):
     pass

@@ -24,7 +24,7 @@ member(A,[_|X]) :- member(A,X).
 
 % auxilliary function for flow_path
 flow_path2([A],B,Nodes) :- dataflow(_,A,B), \+ member(A,Nodes).
-flow_path2([A|C|X],B,Nodes) :-
+flow_path2([A,C|X],B,Nodes) :-
 	dataflow(_,A,C), \+ member(A,Nodes), flow_path2([C|X],B,Nodes).
 % there is a flow path following nodes in L ending in B
 flow_path(L,B) :- flow_path2(L,B,[]).
@@ -45,7 +45,7 @@ all_nodes_prop([A|X],Prop,Value) :-
 % all edges of nodes in path L ++ [B] have property Prop set to Value
 all_edges_prop([A],B,Prop,Value) :-
 	dataflow(F,A,B), property(F,Prop,Value).
-all_edges_prop([A|C|X],B,Prop,Value) :-
+all_edges_prop([A,C|X],B,Prop,Value) :-
 	dataflow(F,A,C), property(F,Prop,Value),
 	all_edges_prop([C|X],Prop,Value).
 

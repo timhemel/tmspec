@@ -13,6 +13,42 @@ datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 dataflow(X,C1,C2) :-
 	type(dataflow,TF), element(X,T), isoftype(T,TF), flow(X,C1,C2).
 
+% X and Y have the same trust zone
+trusted(X,Y) :- property(X,zone,Z), property(Y,zone,Z).
+% X and Y have a different trust zone
+untrusted(X,Y) :- \+ trusted(X,Y).
+
+% list membership
+member(A,[A|X]) :- !.
+member(A,[_|X]) :- member(A,X).
+
+% auxilliary function for flow_path
+flow_path2([A],B,Nodes) :- dataflow(_,A,B), \+ member(A,Nodes).
+flow_path2([A|C|X],B,Nodes) :-
+	dataflow(_,A,C), \+ member(A,Nodes), flow_path2([C|X],B,Nodes).
+% there is a flow path following nodes in L ending in B
+flow_path(L,B) :- flow_path2(L,B,[]).
+
+% there is a flow path between A and B and A and B have different trust zones
+untrusted_flow_path([A|X],B) :- flow_path([A|X],B), untrusted(A,B).
+
+% all nodes in L have type name TN
+all_nodes_type([],TN).
+all_nodes_type([A|X],TN) :-
+	type(TN,TP), element(A,T), isoftype(T,TP), all_nodes_type(X,TN).
+
+% all nodes in L have property Prop set to Value
+all_nodes_prop([],Prop,Value).
+all_nodes_prop([A|X],Prop,Value) :-
+	property(A,Prop,Value), all_nodes_prop(X,Prop,Value).
+
+% all edges of nodes in path L ++ [B] have property Prop set to Value
+all_edges_prop([A],B,Prop,Value) :-
+	dataflow(F,A,B), property(F,Prop,Value).
+all_edges_prop([A|C|X],B,Prop,Value) :-
+	dataflow(F,A,C), property(F,Prop,Value),
+	all_edges_prop([C|X],Prop,Value).
+
 % model checks
 
 error([modelcheck, REFLCONN, 0], [F], 'data flow to self',

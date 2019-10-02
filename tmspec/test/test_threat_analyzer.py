@@ -186,20 +186,23 @@ datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 """
     threatlib_threats_code = """
 % process with authentication::login is a threat
-threat(['test', '001', 0], [X], 'Test threat', 'This is a threat to test')
+threat_descr(['test', '001', 0], 'Test threat', 'This is a threat to test').
+threat(['test', '001', 0], [X])
     :- process(X), property(X,'authentication::login',yes).
 % any flow is a threat
-threat(['test', '002', 0], [X], 'threat to $v1', 'One more threat (on $v1).')
-    :- dataflow(X)."""
+threat_descr(['test', '002', 0], 'threat to $v1', 'One more threat (on $v1).').
+threat(['test', '002', 0], [X]) :- dataflow(X)."""
 
     threatlib_errors_code = """
 % any datastore is an error
-error(['test', '001', 0], [X], 'Error test', 'An error.') :- datastore(X).
+error_descr(['test', '001', 0], 'Error test', 'An error.').
+error(['test', '001', 0], [X]) :- datastore(X).
 """
 
     threatlib_extra_errors_code = """
 % any process is an error
-error(['test', '002', 0], [X], 'Extra error test', 'An extra error.') :- process(X).
+error_descr(['test', '002', 0], 'Extra error test', 'An extra error.').
+error(['test', '002', 0], [X]) :- process(X).
 """
 
     def add_threat_library_from_source(self, analyzer, source):

@@ -4,6 +4,8 @@ import yldprolog.engine
 from yldprolog.engine import get_value, to_python
 from yldprolog.engine import Atom
 
+from ThreatLibrary import ThreatLibrary
+
 class ThreatAnalysisResultItem:
 
     def __init__(self, result_id, elements, short_description,
@@ -96,14 +98,22 @@ class ThreatAnalyzer:
 
     def __init__(self):
         self.query_engine = yldprolog.engine.YP()
-        self.set_prolog_base_functions()
         self.threat_libraries = []
+        self.set_prolog_base_functions()
         self.undefined_properties = set()
         self.model_loading_errors = []
 
     def set_prolog_base_functions(self):
         self.query_engine.register_function('property',
             self.get_element_property)
+
+        t = ThreatLibrary()
+        t.from_string("""
+report_error(Issue, Elements, ShortDescr, LongDescr) :-
+    error(Issue,Elements), error_descr(Issue, ShortDescr, LongDescr).
+report_threat(Issue, Elements, ShortDescr, LongDescr) :-
+    threat(Issue,Elements), threat_descr(Issue, ShortDescr, LongDescr).""")
+        self.add_threat_library(t)
 
     def add_undefined_property(self, element, key):
         self.undefined_properties.add((element, key))
@@ -217,7 +227,7 @@ class ThreatAnalyzer:
         v_elements = self.query_engine.variable()
         v_short_desc = self.query_engine.variable()
         v_long_desc = self.query_engine.variable()
-        q = self.query_engine.query(issue_type, [
+        q = self.query_engine.query('report_%s' % issue_type, [
             v_issue, v_elements, v_short_desc, v_long_desc ])
         r = [list(map(to_python,
             [v_issue, v_elements, v_short_desc, v_long_desc])) for r in q]

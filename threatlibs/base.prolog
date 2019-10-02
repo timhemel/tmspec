@@ -51,19 +51,23 @@ all_edges_prop([A,C|X],B,Prop,Value) :-
 
 % model checks
 
-error([modelcheck, REFLCONN, 0], [F], 'data flow to self',
-   'An element cannot have a data flow to itself.') :- dataflow(F,X,X).
+error_descr([modelcheck, REFLCONN, 0], 'data flow to self',
+   'An element cannot have a data flow to itself.').
+error([modelcheck, REFLCONN, 0], [F]) :- dataflow(F,X,X).
 
-error([modelcheck,PNOINCFLOW,0],[X],'magic process',
-   'Processes do not magically create data, there must be an incoming flow.') :-
-   process(X), \+ dataflow(_,_,X).
+error_descr([modelcheck,PNOINCFLOW,0],'magic process',
+   'Processes do not magically create data, there must be an incoming flow.').
+error([modelcheck,PNOINCFLOW,0],[X]) :- process(X), \+ dataflow(_,_,X).
 
-error([modelcheck, DNOOUTFLOW, 0], [X], 'data store not read',
-   'Data store $v1 only stores data, which is pointless. You may have missed a component or external entity that reads from $v1.') :-
+error_descr([modelcheck, DNOOUTFLOW, 0], 'data store not read',
+   'Data store $v1 only stores data, which is pointless. You may have missed a component or external entity that reads from $v1.').
+error([modelcheck, DNOOUTFLOW, 0], [X]) :-
     datastore(X), \+ dataflow(_,X,_).
 
-error([modelcheck, DDIRECTFLOW, 0], [F,D1,D2], 'direct data store communication',
-   'Data cannot flow between two data stores directly, this requires a process (or external entity).
-Please put a process (or external entity) between $v2 and $v3.') :-
+error_descr([modelcheck, DDIRECTFLOW, 0], 'direct data store communication',
+   'Data cannot flow between two data stores directly, this requires a process
+   (or external entity). Please put a process (or external entity) between
+   $v2 and $v3.').
+error([modelcheck, DDIRECTFLOW, 0], [F,D1,D2]) :-
     datastore(D1), datastore(D2), dataflow(F,D1,D2).
 

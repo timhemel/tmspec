@@ -149,14 +149,11 @@ flow store_info(encryptedflow): webapp --> database, pii;
             return None
         return l[0]
 
-    def test_error_component_without_flow(self):
+    def test_error_component_model_loading_errors(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_without_flows)
-        self.assertEqual(len(a.get_model_loading_errors()),2)
-        self.assertEqual(a.get_model_loading_errors()[0].get_short_description(),
-                'component without flow')
-        webapp = self.find_component_by_name(self.dfd_without_flows, 'webapp')
-        self.assertEqual(a.get_model_loading_errors()[0].get_position(), webapp.get_position())
+        # no model loading errors defined in ThreatAnalyzer
+        self.assertEqual(a.get_model_loading_errors(),[])
 
     def test_analyzer_loads_script(self):
         a = FTOThreatAnalyzer()
@@ -238,17 +235,6 @@ error(['test', '002', 0], [X]) :- process(X).
         self.assertEqual(len(r.get_questions()), 1)
         self.assertEqual(len(r.get_errors()), 2)
 
-    # errors should include components without flows
-    def test_model_analyze_components_without_flows(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_without_flows)
-        r = a.analyze()
-        self.assertEqual(r.get_threats(), [])
-        self.assertEqual(r.get_questions(), [])
-        self.assertEqual(len(r.get_errors()), 2)
-
-
-
     # must clear errors, threats, questions etc. between analyses
     def test_model_analyze_again_with_extra_library(self):
         a = FTOThreatAnalyzer()
@@ -265,14 +251,16 @@ error(['test', '002', 0], [X]) :- process(X).
         self.assertEqual(len(r.get_questions()), 1)
         self.assertEqual(len(r.get_errors()), 2)
 
-    def test_model_analyze_components_without_flows_twice(self):
+    def test_model_analyze_errors_twice(self):
         a = FTOThreatAnalyzer()
         a.set_model(self.dfd_without_flows)
+        self.add_threat_library_from_source(a, self.threatlib_base_code)
+        self.add_threat_library_from_source(a, self.threatlib_errors_code)
         r = a.analyze()
         r = a.analyze()
         self.assertEqual(r.get_threats(), [])
         self.assertEqual(r.get_questions(), [])
-        self.assertEqual(len(r.get_errors()), 2)
+        self.assertEqual(len(r.get_errors()), 1)
 
     # test that templating works in short description of threats and errors
     def test_model_result_short_descr_templating(self):

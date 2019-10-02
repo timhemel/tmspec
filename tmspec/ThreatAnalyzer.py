@@ -203,21 +203,14 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             self.add_clause_type(tmtype)
             for parent_type in tmtype.get_types():
                 self.add_clause_subtype(tmtype, parent_type)
-        components = set()
         for z in self.model.get_zones():
             for component in self.model.get_zone_components(z):
                 self.add_element_types(component)
                 self.add_element_properties(component)
-                components.add(component)
         for flow in self.model.get_flows():
             self.add_element_types(flow)
             self.add_clause_flow(flow)
             self.add_element_properties(flow)
-            components.discard(flow.source)
-            components.discard(flow.target)
-        for c in components:
-            e = ThreatAnalysisError('COMPNOFLOW', [c], 'component without flow', '''Component $v1 does not have any incoming or outgoing flows.''')
-            self.model_loading_errors.append(e)
 
     def add_prolog_rules_from_threat_library(self, threat_library):
         self.query_engine.load_script_from_string(threat_library.get_python_source(), overwrite=False)

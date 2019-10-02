@@ -72,3 +72,9 @@ error_descr([modelcheck, 'DDIRECTFLOW', 0], 'direct data store communication',
 error([modelcheck, 'DDIRECTFLOW', 0], [F,D1,D2]) :-
     datastore(D1), datastore(D2), dataflow(F,D1,D2).
 
+error_descr([modelcheck, 'COMPNOFLOW', 0], 'component without flow',
+	'Component $v1 does not have any incoming or outgoing flows.').
+error([modelcheck, 'COMPNOFLOW', 0], [C]) :-
+	(datastore(C); externalentity(C); process(C)),
+	\+ flow(_,C,_), \+ flow(_,_,C).
+

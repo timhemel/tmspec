@@ -11,6 +11,15 @@ from GraphvizDFDRenderer import *
 from JSONThreatsReporter import JSONThreatsReporter
 from ErrorsAndQuestionsReporter import ErrorsAndQuestionsReporter
 
+def obj_to_prolog(obj):
+    if isinstance(obj, TmType):
+        s = "t_%s" % obj.name
+    elif isinstance(obj, TmElement):
+        s = obj.name
+    else:
+        s = str(obj)
+    return repr(s)
+
 class TmToolApp:
     def __init__(self):
         parser = argparse.ArgumentParser(description='Threat modelling tool')
@@ -20,9 +29,9 @@ class TmToolApp:
         parser.add_argument('-a', '--analyze', dest='mode',
             action='store_const', const='analyze',
             help='analyze DFD against threat library')
-        parser.add_argument('-D', '--dump-clauses', dest='mode',
-            action='store_const', const='dump_clauses',
-            help='dump all Prolog clauses for DFD (i.e. translate to Prolog).')
+        parser.add_argument('-P', '--to-prolog', dest='mode',
+            action='store_const', const='to_prolog',
+            help='output Prolog for DFD and threat libraries')
         parser.add_argument('-i', '--input', action='store',
             help='load threatmodel from INPUT')
         parser.add_argument('-t', '--threats', action='append',
@@ -34,8 +43,8 @@ class TmToolApp:
             self._makeDFD()
         elif self.args.mode == 'analyze':
             self._analyze_dfd()
-        elif self.args.mode == 'dump_clauses':
-            self._dump_clauses()
+        elif self.args.mode == 'to_prolog':
+            self._to_prolog()
     def _makeDFD(self):
         # --dfd -i <input> -o <output>
         try:
@@ -65,19 +74,25 @@ class TmToolApp:
             print(error_report, file=sys.stderr)
         except TmspecError as e:
             print(e, file=sys.stderr)
-    def _dump_clauses(self):
+    def _to_prolog(self):
         try:
             model = parseFile(self.args.input)
             a = ThreatAnalyzer()
             a.set_model(model)
+            print("%% DFD prolog code\n")
             for predicate, answers in a.query_engine._predicates_store.items():
-                print("%s/%d:" % predicate)
+                print("%% %s/%d:" % predicate)
                 for answer in answers:
-                    values = ",".join(str(to_python(x)) for x in answer.values)
+                    values = ",".join(obj_to_prolog(to_python(x)) for x in answer.values)
                     print("%s(%s)." % (predicate[0], values))
                 print()
         except TmspecError as e:
             print(e, file=sys.stderr)
+        for tfn in self.args.threats:
+            p = pathlib.Path(tfn)
+            with open(p,"r") as f:
+                print("%%%% Threat library %s\n" % tfn)
+                sys.stdout.write(f.read())
 
 if __name__ == "__main__":
     TmToolApp().run()

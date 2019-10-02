@@ -25,9 +25,10 @@ member(A,[_|X]) :- member(A,X).
 % auxilliary function for flow_path
 flow_path2([A],B,Nodes) :- dataflow(_,A,B), \+ member(A,Nodes).
 flow_path2([A,C|X],B,Nodes) :-
-	dataflow(_,A,C), \+ member(A,Nodes), flow_path2([C|X],B,Nodes).
+	dataflow(_,A,C), \+ member(A,Nodes), flow_path2([C|X],B,[A|Nodes]).
 % there is a flow path following nodes in L ending in B
 flow_path(L,B) :- flow_path2(L,B,[]).
+
 
 % there is a flow path between A and B and A and B have different trust zones
 untrusted_flow_path([A|X],B) :- flow_path([A|X],B), untrusted(A,B).

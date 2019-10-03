@@ -32,25 +32,38 @@ class GraphvizDFDRenderer:
         })
         for z in self.model.get_zones() + [None]:
             zone_components = self.model.get_zone_components(z)
-            try:
-                z.get_attr('default')
-                cluster_attrs = {
-                    'style': 'invis',
-                }
-            except KeyError:
+            if z is None:
+                zname = '???'
                 cluster_attrs = {
                     'color': 'red',
                     'style': 'dashed',
                     'fontcolor': 'red',
                     'labelloc': 't',
                     'labeljust': 'r',
-                    'label': z.name,
+                    'label': zname,
                 }
+            else:
+                zname = z.name
+                if z.get_attr('default'):
+                    print('default zone', z.get_attr('default'))
+                    cluster_attrs = {
+                        'style': 'invis',
+                    }
+                else:
+                    cluster_attrs = {
+                        'color': 'red',
+                        'style': 'dashed',
+                        'fontcolor': 'red',
+                        'labelloc': 't',
+                        'labeljust': 'r',
+                        'label': zname,
+                    }
  
-            with g.subgraph(name='cluster_'+z.name, graph_attr=cluster_attrs) as cluster:
+            with g.subgraph(name='cluster_'+zname, graph_attr=cluster_attrs) as cluster:
                 for c in zone_components:
                     node_attrs = self._get_graphviz_attributes(c)
                     cluster.node(c.name, label=c.name, _attributes=node_attrs)
+
         for v in self.model.get_flows():
             edge_attrs = self._get_graphviz_attributes(v)
             try:

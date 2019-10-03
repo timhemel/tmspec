@@ -91,12 +91,12 @@ class TmspecModelVisitor(tmspecVisitor):
             raise TmspecErrorUnknownIdentifier(
                 "unknown identifier: {}".format(ctx.getText()),
                 parse_context_to_input_context(self.filename, ctx))
-        base_types = [t.get_base_types() for t in component.get_types()]
-        if 'dataflow' in base_types:
+        if not isinstance(component, TmComponent):
             raise TmspecErrorInvalidType(
-                "element {} is not a dataflow instance"
+                "element {} is not a component instance"
                 .format(ctx.getText()),
                 parse_context_to_input_context(self.filename, ctx))
+        base_types = [t.get_base_types() for t in component.get_types()]
 
     def visitFlow(self, ctx):
         name = ctx.identifier(0).getText()

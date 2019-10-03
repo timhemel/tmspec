@@ -159,6 +159,26 @@ zone outside;
 component webapp(yabbadabbadoo): zone=outside;
 """)
 
+    def test_flow_to_type(self):
+        with self.assertRaises(TmspecErrorInvalidType):
+            model = parseString("""
+version 0.0;
+zone outside;
+component webapp(process): zone=outside;
+flow f1: webapp --> process;
+""")
+
+    def test_flow_to_arrow(self):
+        with self.assertRaises(TmspecErrorInvalidType):
+            model = parseString("""
+version 0.0;
+zone outside;
+component webapp(process): zone=outside;
+component browser(process): zone=outside;
+flow f0: webapp --> browser;
+flow f1: webapp --> f0;
+""")
+ 
     def test_errors_report_file_context(self):
         with self.assertRaises(TmspecErrorUnknownIdentifier) as cm:
             model = parseString("""

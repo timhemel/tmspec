@@ -5,13 +5,14 @@
 isoftype(T,T).
 isoftype(T1,T2) :- subtype(T1,T), isoftype(T,T2).
 
+instanceof(X,N) :- type(N,TP), element(X,T), isoftype(T,TP).
+
 % externalentity, process, dataflow, datastore
 
-externalentity(X) :- type(externalentity,TP), element(X,T), isoftype(T,TP).
-process(X) :- type(process,TP), element(X,T), isoftype(T,TP).
-datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
-dataflow(X,C1,C2) :-
-	type(dataflow,TF), element(X,T), isoftype(T,TF), flow(X,C1,C2).
+externalentity(X) :- instanceof(X,externalentity).
+process(X) :- instanceof(X,process).
+datastore(X) :- instanceof(X,datastore).
+dataflow(X,C1,C2) :- instanceof(X,dataflow), flow(X,C1,C2).
 
 % X and Y have the same trust zone
 trusted(X,Y) :- property(X,zone,Z), property(Y,zone,Z).

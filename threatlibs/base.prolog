@@ -7,7 +7,9 @@ isoftype(T1,T2) :- subtype(T1,T), isoftype(T,T2).
 
 instanceof(X,N) :- type(N,TP), element(X,T), isoftype(T,TP).
 
-% externalentity, process, dataflow, datastore
+% component, externalentity, process, dataflow, datastore
+
+component(X) :- (externalentity(X); process(X); datastore(X)).
 
 externalentity(X) :- instanceof(X,externalentity).
 process(X) :- instanceof(X,process).
@@ -55,7 +57,7 @@ all_edges_prop([A,C|X],B,Prop,Value) :-
 error_descr([modelcheck, 'COMPNOZONE', 0], 'component without zone',
    'Component $v1 has no zone.').
 error([modelcheck, 'COMPNOZONE', 0], [X]) :-
-	(datastore(X); process(X); externalentity(X)),
+	component(X),
 	\+ property(X,zone,_).
 
 error_descr([modelcheck, 'REFLCONN', 0], 'data flow to self',
@@ -82,6 +84,5 @@ error([modelcheck, 'DDIRECTFLOW', 0], [F,D1,D2]) :-
 error_descr([modelcheck, 'COMPNOFLOW', 0], 'component without flow',
 	'Component $v1 does not have any incoming or outgoing flows.').
 error([modelcheck, 'COMPNOFLOW', 0], [C]) :-
-	(datastore(C); externalentity(C); process(C)),
-	\+ flow(_,C,_), \+ flow(_,_,C).
+	component(C), \+ flow(_,C,_), \+ flow(_,_,C).
 

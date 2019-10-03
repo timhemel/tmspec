@@ -27,7 +27,7 @@ class TmElementWithAttributes(TmElement):
                     return p.get_attr(key)
                 except KeyError:
                     pass
-        raise KeyError(key)
+        return None
 
     def get_attributes(self):
         d = {}
@@ -112,6 +112,8 @@ class TmspecModel:
         return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones ]) ]
 
     def get_zone_components(self, z):
+        """returns all components for zone z. If z is None, return the unzoned
+        components."""
         return [ x[1] for x in
                 sorted([ (v.get_position(), v)
                     for c,v in self.components.items()

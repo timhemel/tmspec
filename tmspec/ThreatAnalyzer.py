@@ -203,7 +203,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             self.add_clause_type(tmtype)
             for parent_type in tmtype.get_types():
                 self.add_clause_subtype(tmtype, parent_type)
-        for z in self.model.get_zones():
+        for z in self.model.get_zones() + [None]:
             for component in self.model.get_zone_components(z):
                 self.add_element_types(component)
                 self.add_element_properties(component)

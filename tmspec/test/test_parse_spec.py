@@ -263,15 +263,14 @@ zone outside;
 component login(encryptedflow): zone=outside;
 """)
 
-    def test_component_must_have_zone(self):
-        with self.assertRaises(TmspecErrorComponentWithoutZone):
-            model = parseString("""
+    def test_get_unzoned_components(self):
+        model = parseString("""
 version 0.0;
 type encryptedstore(datastore): encryption;
-zone outside;
 component login(encryptedstore);
 """)
- 
+        self.assertEqual(model.get_zones(), [])
+        self.assertEqual(len(model.get_zone_components(None)), 1)
 
     def test_flow(self):
         model = parseString("""

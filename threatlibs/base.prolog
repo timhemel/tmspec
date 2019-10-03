@@ -52,6 +52,11 @@ all_edges_prop([A,C|X],B,Prop,Value) :-
 	all_edges_prop([C|X],Prop,Value).
 
 % model checks
+error_descr([modelcheck, 'COMPNOZONE', 0], 'component without zone',
+   'Component $v1 has no zone.').
+error([modelcheck, 'COMPNOZONE', 0], [X]) :-
+	(datastore(X); process(X); externalentity(X)),
+	\+ property(X,zone,_).
 
 error_descr([modelcheck, 'REFLCONN', 0], 'data flow to self',
    'An element cannot have a data flow to itself.').

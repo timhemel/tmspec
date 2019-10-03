@@ -30,7 +30,7 @@ class GraphvizDFDRenderer:
             'fontname': 'Sans',
             'fontsize': '8',
         })
-        for z in self.model.get_zones():
+        for z in self.model.get_zones() + [None]:
             zone_components = self.model.get_zone_components(z)
             try:
                 z.get_attr('default')

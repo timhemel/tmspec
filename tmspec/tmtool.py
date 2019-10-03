@@ -66,11 +66,12 @@ class TmToolApp:
                 t.from_prolog_file(p)
                 a.add_threat_library(t)
             results = a.analyze()
-            # write threats to stdout
-            threat_report = JSONThreatsReporter(results).get()
-            print(threat_report, file=sys.stdout)
+            # write threats to stdout, or to file, depending on output mode
+            # threat_report = JSONThreatsReporter(results).get()
+            # print(threat_report+'\n', file=sys.stdout)
+            report_threats = True
             # write errors & questions to stderr
-            error_report = ErrorsAndQuestionsReporter(results).get()
+            error_report = ErrorsAndQuestionsReporter(results, threats=report_threats).get()
             print(error_report, file=sys.stderr)
         except TmspecError as e:
             print(e, file=sys.stderr)

@@ -95,5 +95,8 @@ class TmToolApp:
                 print("%%%% Threat library %s\n" % tfn)
                 sys.stdout.write(f.read())
 
+def main():
+    TmToolApp().run()
+
 if __name__ == "__main__":
     TmToolApp().run()

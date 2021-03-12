@@ -4,8 +4,8 @@ from antlr4.error.ErrorListener import ErrorListener
 import tempfile
 import os
 
-from TmspecError import *
-from TmspecParser import *
+from tmspec.TmspecError import *
+from tmspec.TmspecParser import *
 
 class TestParseSpec(unittest.TestCase):
 

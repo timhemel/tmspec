@@ -3,10 +3,10 @@ import unittest
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
 
-# from TmspecError import *
-from TmspecParser import parseString
-from ThreatAnalyzer import ThreatAnalyzer
-from ThreatLibrary import ThreatLibrary
+# from tmspec.TmspecError import *
+from tmspec.TmspecParser import parseString
+from tmspec.ThreatAnalyzer import ThreatAnalyzer
+from tmspec.ThreatLibrary import ThreatLibrary
 
 from yldprolog.engine import get_value, to_python
 

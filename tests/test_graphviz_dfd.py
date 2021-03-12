@@ -1,6 +1,6 @@
 import unittest
-from TmspecParser import *
-from GraphvizDFDRenderer import *
+from tmspec.TmspecParser import *
+from tmspec.GraphvizDFDRenderer import *
 
 class TestGraphvizDfd(unittest.TestCase):
     pass

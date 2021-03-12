@@ -1,5 +1,5 @@
 
-from ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisThreat
+from .ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisThreat
 
 class ErrorsAndQuestionsReporter:
     def __init__(self, results, errors=True, questions=True, threats=False):

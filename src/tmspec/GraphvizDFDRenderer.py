@@ -1,5 +1,5 @@
 from graphviz import Digraph
-from TmspecModel import *
+from .TmspecModel import *
 
 class GraphvizDFDRenderer:
 

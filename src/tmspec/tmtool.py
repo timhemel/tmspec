@@ -4,12 +4,12 @@ import argparse
 import pathlib
 from yldprolog.engine import to_python
 
-from TmspecParser import *
-from ThreatAnalyzer import ThreatAnalyzer
-from ThreatLibrary import ThreatLibrary
-from GraphvizDFDRenderer import *
-from JSONThreatsReporter import JSONThreatsReporter
-from ErrorsAndQuestionsReporter import ErrorsAndQuestionsReporter
+from .TmspecParser import *
+from .ThreatAnalyzer import ThreatAnalyzer
+from .ThreatLibrary import ThreatLibrary
+from .GraphvizDFDRenderer import *
+from .JSONThreatsReporter import JSONThreatsReporter
+from .ErrorsAndQuestionsReporter import ErrorsAndQuestionsReporter
 
 def obj_to_prolog(obj):
     if isinstance(obj, TmType):

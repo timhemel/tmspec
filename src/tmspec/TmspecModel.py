@@ -1,4 +1,4 @@
-from TmspecError import *
+from .TmspecError import *
 
 class TmElement:
     def __init__(self, name):

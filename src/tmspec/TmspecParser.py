@@ -1,13 +1,13 @@
 from antlr4.error.ErrorListener import ErrorListener
 from antlr4 import *
 
-import sys
-sys.path.insert(0, '..')
+# import sys
+# sys.path.insert(0, '..')
 # TODO: remove this?
-from tmspecLexer import *
-from tmspecParser import *
-from TmspecError import *
-from TmspecModelVisitor import *
+from .tmspecLexer import *
+from .tmspecParser import *
+from .TmspecError import *
+from .TmspecModelVisitor import *
 
 class ExceptionErrorListener(ErrorListener):
 

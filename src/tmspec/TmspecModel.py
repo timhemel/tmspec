@@ -1,5 +1,8 @@
 from .TmspecError import *
 
+import pkg_resources
+import os
+
 class TmElement:
     def __init__(self, name):
         self.name = name
@@ -82,8 +85,7 @@ class TmspecModel:
                 #'gv_shape': 'cylinder',
                 'gv_shape': 'none',
                 # SVG image is possible, but must have width and height
-                # 'gv_image': '/usr/share/pixmaps/fedora-logo-sprite.svg',
-                'gv_image': '/home/tim/tmspec/python3/test/datastore.svg',
+                'gv_image': pkg_resources.resource_filename('tmspec', os.path.join('resources', 'datastore.svg')),
                 # html labels are another possibility
             }),
             'dataflow' : TmType('dataflow', None, attrs={

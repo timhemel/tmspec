@@ -11,6 +11,8 @@ from .ThreatLibrary import ThreatLibrary
 from .GraphvizDFDRenderer import *
 from .JSONThreatsReporter import JSONThreatsReporter
 from . import quickfix_reporter
+from . import json_reporter
+from . import console_reporter
 
 def obj_to_prolog(obj):
     if isinstance(obj, TmType):
@@ -88,8 +90,18 @@ def prolog(threat_libraries, out_file, infiles):
 @main.command()
 @click.option('-t', '--threat-library', 'threat_libraries', multiple=True, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
 @click.option('-o', '--out-file', type=click.Path(exists=False, allow_dash=True))
+@click.option('-c', '--console', 'output_format', flag_value='console', default='console')
+@click.option('-j', '--json', 'output_format', flag_value='json')
+@click.option('-q', '--quickfix', 'output_format', flag_value='quickfix')
 @click.argument('infiles', nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
-def analyze(threat_libraries, out_file, infiles):
+def analyze(threat_libraries, out_file, output_format, infiles):
+
+    if output_format == 'console':
+        reporter = console_reporter.report
+    elif output_format == 'json':
+        reporter = json_reporter.report
+    elif output_format == 'quickfix':
+        reporter = quickfix_reporter.report
 
     if out_file is not None:
         outf = click.open_file(out_file, "w")

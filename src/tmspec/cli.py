@@ -9,7 +9,6 @@ from .TmspecParser import *
 from .ThreatAnalyzer import ThreatAnalyzer
 from .ThreatLibrary import ThreatLibrary
 from .GraphvizDFDRenderer import *
-from .JSONThreatsReporter import JSONThreatsReporter
 from . import quickfix_reporter
 from . import json_reporter
 from . import console_reporter

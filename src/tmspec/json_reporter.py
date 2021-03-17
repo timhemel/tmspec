@@ -16,3 +16,12 @@ class JSONThreatsReporter:
         }
     def get(self):
         return json.dumps(self.report, sort_keys=True, indent=4)
+
+
+class JsonReporter:
+    def __init__(self):
+        pass
+
+    def report(self, results, out_file, errors=True, questions=True, threats=False, errors_file=None, questions_file=None, threats_file=None):
+        pass
+

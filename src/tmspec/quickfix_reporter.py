@@ -23,15 +23,19 @@ def report_items(outf, items):
         outf.write(make_error_line(i))
         outf.write('\n')
 
-def report(results, out_file, errors=True, questions=True, threats=False, errors_file=None, questions_file=None, threats_file=None):
-    if errors:
-        outf_errors = errors_file if errors_file else out_file
-        report_items(outf_errors, results.get_errors())
-    if questions:
-        outf_questions = questions_file if questions_file else out_file
-        report_items(outf_questions, results.get_questions())
-    if threats:
-        outf_threats = threats_file if threats_file else out_file
-        report_items(outf_threats, results.get_threats())
+class QuickfixReporter:
+    def __init__(self):
+        pass
+
+    def report(self, results, out_file, errors=True, questions=True, threats=False, errors_file=None, questions_file=None, threats_file=None):
+        if errors:
+            outf_errors = errors_file if errors_file else out_file
+            report_items(outf_errors, results.get_errors())
+        if questions:
+            outf_questions = questions_file if questions_file else out_file
+            report_items(outf_questions, results.get_questions())
+        if threats:
+            outf_threats = threats_file if threats_file else out_file
+            report_items(outf_threats, results.get_threats())
 
 

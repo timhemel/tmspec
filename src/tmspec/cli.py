@@ -9,9 +9,9 @@ from .TmspecParser import *
 from .ThreatAnalyzer import ThreatAnalyzer
 from .ThreatLibrary import ThreatLibrary
 from .GraphvizDFDRenderer import *
-from . import quickfix_reporter
-from . import json_reporter
-from . import console_reporter
+from .quickfix_reporter import QuickfixReporter
+from .json_reporter import JsonReporter
+from .console_reporter import ConsoleReporter
 
 def obj_to_prolog(obj):
     if isinstance(obj, TmType):
@@ -96,11 +96,11 @@ def prolog(threat_libraries, out_file, infiles):
 def analyze(threat_libraries, out_file, output_format, infiles):
 
     if output_format == 'console':
-        reporter = console_reporter.report
+        reporter = ConsoleReporter()
     elif output_format == 'json':
-        reporter = json_reporter.report
+        reporter = JsonReporter()
     elif output_format == 'quickfix':
-        reporter = quickfix_reporter.report
+        reporter = QuickfixReporter()
 
     if out_file is not None:
         outf = click.open_file(out_file, "w")
@@ -114,7 +114,7 @@ def analyze(threat_libraries, out_file, output_format, infiles):
             # threat_report = JSONThreatsReporter(results).get()
             # print(threat_report+'\n', file=sys.stdout)
             report_threats = True
-            quickfix_reporter.report(results, outf, threats=report_threats)
+            reporter.report(results, outf, threats=report_threats)
         except TmspecError as e:
             click.echo(e, err=True)
 

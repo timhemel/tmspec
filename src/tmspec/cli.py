@@ -10,7 +10,7 @@ from .ThreatAnalyzer import ThreatAnalyzer
 from .ThreatLibrary import ThreatLibrary
 from .GraphvizDFDRenderer import *
 from .JSONThreatsReporter import JSONThreatsReporter
-from . import ErrorsAndQuestionsReporter
+from . import quickfix_reporter
 
 def obj_to_prolog(obj):
     if isinstance(obj, TmType):
@@ -179,10 +179,7 @@ def analyze(threat_libraries, out_file, infiles):
             # threat_report = JSONThreatsReporter(results).get()
             # print(threat_report+'\n', file=sys.stdout)
             report_threats = True
-            # write errors & questions to stderr
-            ErrorsAndQuestionsReporter.report(results, outf, threats=report_threats)
-            # outf.write(error_report)
-            # outf.write('\n')
+            quickfix_reporter.report(results, outf, threats=report_threats)
         except TmspecError as e:
             click.echo(e, err=True)
 

@@ -92,15 +92,22 @@ def prolog(threat_libraries, out_file, infiles):
 @click.option('-c', '--console', 'output_format', flag_value='console', default='console')
 @click.option('-j', '--json', 'output_format', flag_value='json')
 @click.option('-q', '--quickfix', 'output_format', flag_value='quickfix')
+@click.option('--errors/--no-errors', 'report_errors', default=True)
+@click.option('--questions/--no-questions', 'report_questions', default=True)
+@click.option('--threats/--no-threats', 'report_threats', default=True)
+@click.option('--errors-file', type=click.Path(exists=False, allow_dash=True))
+@click.option('--questions-file', type=click.Path(exists=False, allow_dash=True))
+@click.option('--threats-file', type=click.Path(exists=False, allow_dash=True))
 @click.argument('infiles', nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
-def analyze(threat_libraries, out_file, output_format, infiles):
+@click.pass_context
+def analyze(ctx, threat_libraries, out_file, output_format, report_errors, report_questions, report_threats, errors_file, questions_file, threats_file, infiles):
 
     if output_format == 'console':
-        reporter = ConsoleReporter()
+        reporter = ConsoleReporter(ctx.params)
     elif output_format == 'json':
-        reporter = JsonReporter()
+        reporter = JsonReporter(ctx.params)
     elif output_format == 'quickfix':
-        reporter = QuickfixReporter()
+        reporter = QuickfixReporter(ctx.params)
 
     if out_file is not None:
         outf = click.open_file(out_file, "w")
@@ -110,11 +117,7 @@ def analyze(threat_libraries, out_file, output_format, infiles):
     for infile in infiles:
         try:
             results = analyze_specfile(infile, threat_libraries)
-            # write threats to stdout, or to file, depending on output mode
-            # threat_report = JSONThreatsReporter(results).get()
-            # print(threat_report+'\n', file=sys.stdout)
-            report_threats = True
-            reporter.report(results, outf, threats=report_threats)
+            reporter.report(results, outf)
         except TmspecError as e:
             click.echo(e, err=True)
 

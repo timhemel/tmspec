@@ -1,19 +1,16 @@
-import unittest
 from tmspec.TmspecParser import *
 from tmspec.GraphvizDFDRenderer import *
 
-class TestGraphvizDfd(unittest.TestCase):
-    pass
 
-    def test_component_in_zone(self):
-        model = parseString("""
+def test_component_in_zone():
+    model = parseString("""
 version 0.0;
 zone outside;
 component webapp(process): zone=outside, cookies;
 """)
 
-    def test_complete_graph(self):
-        model = parseString("""
+def test_complete_graph():
+    model = parseString("""
 version 0.0;
 zone outside;
 zone inside;
@@ -28,10 +25,10 @@ flow login_r: browser <-- webapp, label='3. send session token';
 flow browse: user --> browser;
 flow browse_r: user <-- browser;
 """)
-        dot = GraphvizDFDRenderer(model).get_dot()
+    dot = GraphvizDFDRenderer(model).get_dot()
 
-    def test_complete_graph_default_zone(self):
-        model = parseString("""
+def test_complete_graph_default_zone():
+    model = parseString("""
 version 0.0;
 zone outside: default;
 zone inside;
@@ -46,8 +43,5 @@ flow login_r: browser <-- webapp, label='3. send session token';
 flow browse: user --> browser;
 flow browse_r: user <-- browser;
 """)
-        dot = GraphvizDFDRenderer(model).get_dot()
+    dot = GraphvizDFDRenderer(model).get_dot()
 
-
-if __name__ == "__main__":
-    unittest.main()

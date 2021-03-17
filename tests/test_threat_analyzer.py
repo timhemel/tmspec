@@ -1,5 +1,5 @@
 
-import unittest
+import re
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
 
@@ -31,9 +31,8 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
     def get_model_loading_errors(self):
         return sorted(self.model_loading_errors, key=lambda x: x.elements[0].get_position())
 
-class TestThreatAnalyzer(unittest.TestCase):
 
-    dfd_without_flows = parseString("""
+dfd_without_flows = parseString("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -41,7 +40,7 @@ component webapp(process): zone=outside;
 component database(datastore): zone=outside;
 """)
 
-    dfd_with_flows = parseString("""
+dfd_with_flows = parseString("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -51,251 +50,251 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
 
-    def test_model_query_element_type(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        zone = self.dfd_with_flows.get_zones()[0]
-        components = self.dfd_with_flows.get_zone_components(zone)
-        elt = a.atom(components[0])
-        value = a.variable()
-        q = a.query('element', [elt, value])
-        r = [[to_python(elt), to_python(value) ] for _ in q]
-        self.assertEqual(r, [[components[0], components[0].get_types()[0]]])
+def test_model_query_element_type():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    zone = dfd_with_flows.get_zones()[0]
+    components = dfd_with_flows.get_zone_components(zone)
+    elt = a.atom(components[0])
+    value = a.variable()
+    q = a.query('element', [elt, value])
+    r = [[to_python(elt), to_python(value) ] for _ in q]
+    assert r == [[components[0], components[0].get_types()[0]]]
+
     
-    def test_model_query_element_type_inherited(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        zone = self.dfd_with_flows.get_zones()[0]
-        flows = self.dfd_with_flows.get_flows()
-        elt = a.atom(flows[0])
-        value = a.variable()
-        q = a.query('element', [elt, value])
-        r = [[to_python(elt), to_python(value)] for _ in q]
-        self.assertEqual(r, [[flows[0], flows[0].get_types()[0]]])
+def test_model_query_element_type_inherited():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    zone = dfd_with_flows.get_zones()[0]
+    flows = dfd_with_flows.get_flows()
+    elt = a.atom(flows[0])
+    value = a.variable()
+    q = a.query('element', [elt, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    assert r == [[flows[0], flows[0].get_types()[0]]]
+
+def test_model_query_component_zone():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    elt = a.variable()
+    value = a.variable()
+    const_zone = a.atom('zone')
+    q = a.query('property', [elt, const_zone, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    zone = dfd_with_flows.get_zones()[0]
+    components = dfd_with_flows.get_zone_components(zone)
+    assert r == [[components[0], zone], [components[1], zone]]
+
+def test_model_query_undefined_property():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    flows = dfd_with_flows.get_flows()
+    # elt = a.variable()
+    elt = a.atom(flows[0])
+    value = a.variable()
+    const_key = a.atom('define_me')
+    q = a.query('property', [elt, const_key, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    assert r == []
+    assert len(a.get_undefined_properties()) == 1
+
+def test_model_query_dataflow_has_property():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    elt = a.variable()
+    value = a.variable()
+    const_key = a.atom('https')
+    q = a.query('property', [elt, const_key, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    flows = dfd_with_flows.get_flows()
+    assert r == [[flows[0], True]]
+
+def test_model_query_flow_clause():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    v_from = a.variable()
+    v_to = a.variable()
+    v_elt = a.variable()
+    q = a.query('flow', [v_elt, v_from, v_to])
+    r = [[to_python(v_elt), to_python(v_from), to_python(v_to)] for _ in q]
+    flows = dfd_with_flows.get_flows()
+    assert r == [[flows[0], flows[0].source, flows[0].target]]
+
+def test_model_types_defined():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    name = a.variable()
+    tmtype = a.variable()
+    q = a.query('type', [name, tmtype])
+    r = [[to_python(name), to_python(tmtype)] for _ in q]
+    types = dfd_with_flows.get_types()
+    assert r == [[t.name, t] for t in types]
+
+def test_model_subtypes_defined():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    tmtype = a.variable()
+    parent_type = a.variable()
+    q = a.query('subtype', [tmtype, parent_type])
+    r = [[to_python(tmtype), to_python(parent_type)] for _ in q]
+    tmtype = dfd_with_flows.get_flows()[0].get_types()[0]
+    assert r == [[tmtype, t] for t in tmtype.get_types()]
+
+def find_component_by_name(model, name):
+    l = [
+        c for z in model.get_zones()
+        for c in model.get_zone_components(z)
+        if c.name == name ]
+    if l == []:
+        return None
+    return l[0]
+
+def test_error_component_model_loading_errors():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_without_flows)
+    # no model loading errors defined in ThreatAnalyzer
+    assert a.get_model_loading_errors() == []
+
+def test_analyzer_loads_script():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    tl = ThreatLibrary()
+    tl.from_string('animal(monkey).')
+    a.add_prolog_rules_from_threat_library(tl)
+    v = a.variable()
+    q = a.query('animal', [v])
+    r = [to_python(v) for _ in q]
+    assert r[0] == 'monkey'
     
-    def test_model_query_component_zone(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        elt = a.variable()
-        value = a.variable()
-        const_zone = a.atom('zone')
-        q = a.query('property', [elt, const_zone, value])
-        r = [[to_python(elt), to_python(value)] for _ in q]
-        zone = self.dfd_with_flows.get_zones()[0]
-        components = self.dfd_with_flows.get_zone_components(zone)
-        self.assertEqual(r, [[components[0], zone], [components[1], zone]])
 
-    def test_model_query_undefined_property(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        flows = self.dfd_with_flows.get_flows()
-        # elt = a.variable()
-        elt = a.atom(flows[0])
-        value = a.variable()
-        const_key = a.atom('define_me')
-        q = a.query('property', [elt, const_key, value])
-        r = [[to_python(elt), to_python(value)] for _ in q]
-        self.assertEqual(r, [])
-        self.assertEqual(len(a.get_undefined_properties()), 1)
+def test_analyze_model_no_threats():
+    a = ThreatAnalyzer()
+    a.set_model(dfd_with_flows)
+    r = a.analyze()
+    assert r.get_threats() == []
+    assert r.get_questions() == []
 
-    def test_model_query_dataflow_has_property(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        elt = a.variable()
-        value = a.variable()
-        const_key = a.atom('https')
-        q = a.query('property', [elt, const_key, value])
-        r = [[to_python(elt), to_python(value)] for _ in q]
-        flows = self.dfd_with_flows.get_flows()
-        self.assertEqual(r, [[flows[0], True]])
-
-    def test_model_query_flow_clause(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        v_from = a.variable()
-        v_to = a.variable()
-        v_elt = a.variable()
-        q = a.query('flow', [v_elt, v_from, v_to])
-        r = [[to_python(v_elt), to_python(v_from), to_python(v_to)] for _ in q]
-        flows = self.dfd_with_flows.get_flows()
-        self.assertEqual(r, [[flows[0], flows[0].source, flows[0].target]])
-
-    def test_model_types_defined(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        name = a.variable()
-        tmtype = a.variable()
-        q = a.query('type', [name, tmtype])
-        r = [[to_python(name), to_python(tmtype)] for _ in q]
-        types = self.dfd_with_flows.get_types()
-        self.assertEqual(r, [[t.name, t] for t in types])
-
-    def test_model_subtypes_defined(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        tmtype = a.variable()
-        parent_type = a.variable()
-        q = a.query('subtype', [tmtype, parent_type])
-        r = [[to_python(tmtype), to_python(parent_type)] for _ in q]
-        tmtype = self.dfd_with_flows.get_flows()[0].get_types()[0]
-        self.assertEqual(r, [[tmtype, t] for t in tmtype.get_types()])
-
-    def find_component_by_name(self, model, name):
-        l = [
-            c for z in model.get_zones()
-            for c in model.get_zone_components(z)
-            if c.name == name ]
-        if l == []:
-            return None
-        return l[0]
-
-    def test_error_component_model_loading_errors(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_without_flows)
-        # no model loading errors defined in ThreatAnalyzer
-        self.assertEqual(a.get_model_loading_errors(),[])
-
-    def test_analyzer_loads_script(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        tl = ThreatLibrary()
-        tl.from_string('animal(monkey).')
-        a.add_prolog_rules_from_threat_library(tl)
-        v = a.variable()
-        q = a.query('animal', [v])
-        r = [to_python(v) for _ in q]
-        self.assertEqual(r[0], 'monkey')
-        
-
-    def test_analyze_model_no_threats(self):
-        a = ThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
-        r = a.analyze()
-        self.assertEqual(r.get_threats(), [])
-        self.assertEqual(r.get_questions(), [])
-
-    threatlib_base_code = """
+threatlib_base_code = """
 isoftype(T,T).
 isoftype(T1,T2) :- subtype(T1,T), isoftype(T,T2).
 process(X) :- type(process,TP), element(X,T), isoftype(T,TP).
 dataflow(X) :- type(dataflow,TF), element(X,T), isoftype(T,TF).
 datastore(X) :- type(datastore,TF), element(X,T), isoftype(T,TF).
 """
-    threatlib_threats_code = """
+threatlib_threats_code = """
 % process with authentication::login is a threat
 threat_descr(['test', '001', 0], 'Test threat', 'This is a threat to test').
 threat(['test', '001', 0], [X])
-    :- process(X), property(X,'authentication::login',yes).
+:- process(X), property(X,'authentication::login',yes).
 % any flow is a threat
 threat_descr(['test', '002', 0], 'threat to $v1', 'One more threat (on $v1).').
 threat(['test', '002', 0], [X]) :- dataflow(X)."""
 
-    threatlib_errors_code = """
+threatlib_errors_code = """
 % any datastore is an error
 error_descr(['test', '001', 0], 'Error test', 'An error.').
 error(['test', '001', 0], [X]) :- datastore(X).
 """
 
-    threatlib_extra_errors_code = """
+threatlib_extra_errors_code = """
 % any process is an error
 error_descr(['test', '002', 0], 'Extra error test', 'An extra error.').
 error(['test', '002', 0], [X]) :- process(X).
 """
 
-    def add_threat_library_from_source(self, analyzer, source):
-        t = ThreatLibrary()
-        t.from_string(source)
-        analyzer.add_threat_library(t)
 
-    def test_model_threats_multiple_libraries(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
+def add_threat_library_from_source(analyzer, source):
+    t = ThreatLibrary()
+    t.from_string(source)
+    analyzer.add_threat_library(t)
 
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_threats_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+def test_model_threats_multiple_libraries():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
 
-        r = a.analyze()
-        self.assertEqual(len(r.get_threats()), 1)
-        self.assertEqual(len(r.get_questions()), 1)
-        self.assertEqual(len(r.get_errors()), 1)
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_threats_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
 
-    # loading multiple threat libraries should not overwrite definitions
-    def test_model_analyze_with_extra_library(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
+    r = a.analyze()
+    assert len(r.get_threats()) == 1
+    assert len(r.get_questions()) == 1
+    assert len(r.get_errors()) == 1
 
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_threats_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
-        self.add_threat_library_from_source(a, self.threatlib_extra_errors_code)
+# loading multiple threat libraries should not overwrite definitions
+def test_model_analyze_with_extra_library():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
 
-        r = a.analyze()
-        self.assertEqual(len(r.get_threats()), 1)
-        self.assertEqual(len(r.get_questions()), 1)
-        self.assertEqual(len(r.get_errors()), 2)
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_threats_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
+    add_threat_library_from_source(a, threatlib_extra_errors_code)
 
-    # must clear errors, threats, questions etc. between analyses
-    def test_model_analyze_again_with_extra_library(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
+    r = a.analyze()
+    assert len(r.get_threats()) == 1
+    assert len(r.get_questions()) == 1
+    assert len(r.get_errors()) == 2
 
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_threats_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+# must clear errors, threats, questions etc. between analyses
+def test_model_analyze_again_with_extra_library():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
 
-        r = a.analyze()
-        self.add_threat_library_from_source(a, self.threatlib_extra_errors_code)
-        r = a.analyze()
-        self.assertEqual(len(r.get_threats()), 1)
-        self.assertEqual(len(r.get_questions()), 1)
-        self.assertEqual(len(r.get_errors()), 2)
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_threats_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
 
-    def test_model_analyze_errors_twice(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_without_flows)
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
-        r = a.analyze()
-        r = a.analyze()
-        self.assertEqual(r.get_threats(), [])
-        self.assertEqual(r.get_questions(), [])
-        self.assertEqual(len(r.get_errors()), 1)
+    r = a.analyze()
+    add_threat_library_from_source(a, threatlib_extra_errors_code)
+    r = a.analyze()
+    assert len(r.get_threats()) == 1
+    assert len(r.get_questions()) == 1
+    assert len(r.get_errors()) == 2
 
-    # test that templating works in short description of threats and errors
-    def test_model_result_short_descr_templating(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
+def test_model_analyze_errors_twice():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_without_flows)
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
+    r = a.analyze()
+    r = a.analyze()
+    assert r.get_threats() == []
+    assert r.get_questions() == []
+    assert len(r.get_errors()) == 1
 
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_threats_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+# test that templating works in short description of threats and errors
+def test_model_result_short_descr_templating():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
 
-        r = a.analyze()
-        threat = r.get_threats()[0]
-        flow = self.dfd_with_flows.get_flows()[0]
-        self.assertRegex(threat.get_short_description(), flow.name)
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_threats_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
 
-    def test_reporting_interface(self):
-        a = FTOThreatAnalyzer()
-        a.set_model(self.dfd_with_flows)
+    r = a.analyze()
+    threat = r.get_threats()[0]
+    flow = dfd_with_flows.get_flows()[0]
+    assert re.search(flow.name, threat.get_short_description())
 
-        self.add_threat_library_from_source(a, self.threatlib_base_code)
-        self.add_threat_library_from_source(a, self.threatlib_threats_code)
-        self.add_threat_library_from_source(a, self.threatlib_errors_code)
+def test_reporting_interface():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows)
 
-        r = a.analyze()
-        threat = r.get_threats()[0]
-        flow = self.dfd_with_flows.get_flows()[0]
-        self.assertRegex(threat.get_short_description(), flow.name)
-        self.assertEqual(threat.get_position(), flow.get_position())
-        self.assertRegex(threat.get_long_description(), flow.name)
-        self.assertEqual(threat.get_id(), 'test-002-0')
-        self.assertEqual(threat.get_elements(), [flow])
+    add_threat_library_from_source(a, threatlib_base_code)
+    add_threat_library_from_source(a, threatlib_threats_code)
+    add_threat_library_from_source(a, threatlib_errors_code)
+
+    r = a.analyze()
+    threat = r.get_threats()[0]
+    flow = dfd_with_flows.get_flows()[0]
+    assert re.search(flow.name, threat.get_short_description())
+    assert threat.get_position() == flow.get_position()
+    assert re.search(flow.name, threat.get_long_description())
+    assert threat.get_id() == 'test-002-0'
+    assert threat.get_elements() == [flow]
 
 
-    # ensure that errors, threats and questions are sorted
-    # test that invalid libraries throw exception, TODO: how do we handle this?
+# ensure that errors, threats and questions are sorted
+# test that invalid libraries throw exception, TODO: how do we handle this?
 
-if __name__ == "__main__":
-    unittest.main()

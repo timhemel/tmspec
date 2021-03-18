@@ -5,7 +5,7 @@ import argparse
 import pathlib
 from yldprolog.engine import to_python
 
-from .TmspecParser import *
+from .tmspec_parser import *
 from .ThreatAnalyzer import ThreatAnalyzer
 from .ThreatLibrary import ThreatLibrary
 from .GraphvizDFDRenderer import *
@@ -118,6 +118,15 @@ def analyze(ctx, threat_libraries, out_file, output_format, report_errors, repor
         try:
             results = analyze_specfile(infile, threat_libraries)
             reporter.report(results, outf)
+        except TmspecError as e:
+            click.echo(e, err=True)
+
+@main.command()
+@click.argument('infiles', nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
+def parse(infiles):
+    for infile in infiles:
+        try:
+            model = parseFile(infile)
         except TmspecError as e:
             click.echo(e, err=True)
 

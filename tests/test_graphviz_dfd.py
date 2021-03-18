@@ -1,4 +1,4 @@
-from tmspec.TmspecParser import *
+from tmspec.tmspec_parser import *
 from tmspec.GraphvizDFDRenderer import *
 
 

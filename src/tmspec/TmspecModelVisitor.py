@@ -206,14 +206,14 @@ class TmspecModelVisitor(tmspecVisitor):
             attr_name = unquote_string(ctx.QSTRING().getText())
         if ctx.value():
             logging.debug('visitAttribute: value')
-            attr_value = self.visitValue(ctx.value())
+            attr_value = self.visitValue(ctx.value(), force_identifier_resolution=attr_name == 'zone')
         else:
             logging.debug('visitAttribute: \'true\'')
             attr_value = True
         return attr_name, attr_value
 
-    def visitValue(self, ctx):
-        logging.debug('visitValue')
+    def visitValue(self, ctx, force_identifier_resolution=False):
+        logging.debug('visitValue: force_identifier_resolution=%s', force_identifier_resolution)
         if ctx.number():
             logging.debug('visitValue: number: %s', ctx.number().getText())
             return int(ctx.number().getText())
@@ -222,9 +222,11 @@ class TmspecModelVisitor(tmspecVisitor):
             identifier = ctx.identifier().getText()
             obj = self.model.get_identifier(identifier)
             if obj is None:
-                raise TmspecErrorUnknownIdentifier(
-                    "unknown identifier: {}".format(identifier),
-                    parse_context_to_input_context(self.filename, ctx.identifier()))
+                if force_identifier_resolution:
+                    raise TmspecErrorUnknownIdentifier(
+                        "unknown identifier: {}".format(identifier),
+                        parse_context_to_input_context(self.filename, ctx.identifier()))
+                return identifier
             return obj
         if ctx.QSTRING():
             logging.debug('visitValue: QSTRING: %s', ctx.QSTRING().getText())

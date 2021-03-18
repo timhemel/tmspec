@@ -3,6 +3,8 @@
 import click
 import argparse
 import pathlib
+import logging
+
 from yldprolog.engine import to_python
 
 from .tmspec_parser import *
@@ -50,8 +52,10 @@ def analyze_specfile(infile, threat_libraries):
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-def main():
-    pass
+@click.option('-v', '--verbose', is_flag=True)
+def main(verbose):
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
 @main.command()
 # TODO: output results instead of showing to screen

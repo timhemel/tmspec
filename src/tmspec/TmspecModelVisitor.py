@@ -1,5 +1,6 @@
 from .tmspecVisitor import tmspecVisitor
 from .TmspecModel import *
+import logging
 
 def unquote_string(s):
     i = 1
@@ -45,10 +46,13 @@ class TmspecModelVisitor(tmspecVisitor):
         self.filename = filename
 
     def visitStart(self, ctx):
+        logging.debug('visitStart')
         self.visitChildren(ctx)
         return self.model
 
     def visitZone(self, ctx):
+        logging.debug('visitZone')
+        logging.debug('visitZone: identifier(0): %s', ctx.identifier().getText())
         zone_name = ctx.identifier().getText()
         zone_ctx = parse_context_to_input_context(self.filename, ctx)
         if self.model.has_identifier(zone_name):
@@ -56,28 +60,36 @@ class TmspecModelVisitor(tmspecVisitor):
                 "identfier {} already in use.".format(zone_name),
                 parse_context_to_input_context(self.filename, ctx.identifier()))
         if ctx.attributes():
+            logging.debug('visitZone: has attributes')
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
+            logging.debug('visitZone: has no attributes')
             attributes = {}
         zone = TmZone(zone_name, zone_ctx, attributes)
         self.model.add_zone(zone)
 
     def visitTypedef(self, ctx):
+        logging.debug('visitTypedef')
         type_name, type_parents = self.visitNameAndType(ctx.name_and_type(), None)
         type_ctx = parse_context_to_input_context(self.filename, ctx)
         if ctx.attributes():
+            logging.debug('visitTypedef: has attributes')
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
+            logging.debug('visitTypedef: has no attributes')
             attributes = {}
         new_type = TmType(type_name, type_ctx, type_parents, attributes)
         self.model.add_type(new_type)
 
     def visitComponent(self, ctx):
+        logging.debug('visitComponent')
         component_name, component_types = self.visitNameAndType(ctx.name_and_type(), ['datastore', 'process', 'externalentity'])
         component_ctx = parse_context_to_input_context(self.filename, ctx)
         if ctx.attributes():
+            logging.debug('visitComponent: has attributes')
             attributes = dict(self.visitAttributes(ctx.attributes()))
         else:
+            logging.debug('visitComponent: has no attributes')
             attributes = {}
         component = TmComponent(component_name, component_ctx, component_types, attributes)
         #try:
@@ -99,6 +111,8 @@ class TmspecModelVisitor(tmspecVisitor):
         base_types = [t.get_base_types() for t in component.get_types()]
 
     def visitFlow(self, ctx):
+        logging.debug('visitFlow')
+        logging.debug('visitFlow: identifier(0): %s', ctx.identifier(0).getText())
         name = ctx.identifier(0).getText()
         flow_ctx = parse_context_to_input_context(self.filename, ctx)
         if self.model.has_identifier(name):
@@ -106,8 +120,10 @@ class TmspecModelVisitor(tmspecVisitor):
                 "identifier {} already in use.".format(name),
                 parse_context_to_input_context(self.filename, ctx.identifier(0)))
         if ctx.typing() is not None:
+            logging.debug('visitFlow: has explicit type')
             types = self.visitTyping(ctx.typing(), ['dataflow'])
         else:
+            logging.debug('visitFlow: has implicit type')
             types = [self.model.get_identifier('dataflow')]
         component1 = self.model.get_identifier(ctx.identifier(1).getText())
         self._checkDataflowComponent(component1, ctx.identifier(1))
@@ -115,19 +131,25 @@ class TmspecModelVisitor(tmspecVisitor):
         self._checkDataflowComponent(component2, ctx.identifier(2))
         # determine arrow direction
         if ctx.arrow().RARROW() is not None: # -->
+            logging.debug('visitFlow: -->')
             source = component1
             target = component2
         else:
+            logging.debug('visitFlow: <--')
             source = component2
             target = component1
         if ctx.attributes():
+            logging.debug('visitFlow: has attributes')
             attributes = self.visitAttributes(ctx.attributes())
         else:
+            logging.debug('visitFlow: no attributes')
             attributes = []
         flow = TmFlow(name, flow_ctx, source, target, types, dict(attributes))
         self.model.add_flow(flow)
 
     def visitNameAndType(self, ctx, type_restrictions):
+        logging.debug('visitNameAndType')
+        logging.debug('visitNameAndType: identifier: %s', ctx.identifier().getText())
         name = ctx.identifier().getText()
         if self.model.has_identifier(name):
             raise TmspecErrorDuplicateIdentifier(
@@ -137,9 +159,11 @@ class TmspecModelVisitor(tmspecVisitor):
         return (name, types)
 
     def visitTyping(self, ctx, type_restrictions):
+        logging.debug('visitTyping')
         types = []
         base_types = set([])
         for c in ctx.identifier():
+            logging.debug('visitTyping: identifier: %s', c.getText())
             obj = self.model.get_identifier(c.getText())
             if not obj:
                 raise TmspecErrorUnknownIdentifier(
@@ -169,23 +193,32 @@ class TmspecModelVisitor(tmspecVisitor):
         return types
 
     def visitAttributes(self, ctx):
+        logging.debug('visitAttributes')
         return [self.visitAttribute(c) for c in ctx.attribute()]
 
     def visitAttribute(self, ctx):
+        logging.debug('visitAttribute')
         if ctx.identifier():
+            logging.debug('visitAttribute: identifier: %s', ctx.identifier().getText())
             attr_name = ctx.identifier().getText()
         else:
+            logging.debug('visitAttribute: QSTRING: %s', ctx.QSTRING().getText())
             attr_name = unquote_string(ctx.QSTRING().getText())
         if ctx.value():
+            logging.debug('visitAttribute: value')
             attr_value = self.visitValue(ctx.value())
         else:
+            logging.debug('visitAttribute: \'true\'')
             attr_value = True
         return attr_name, attr_value
 
     def visitValue(self, ctx):
+        logging.debug('visitValue')
         if ctx.number():
+            logging.debug('visitValue: number: %s', ctx.number().getText())
             return int(ctx.number().getText())
         if ctx.identifier():
+            logging.debug('visitValue: identifier: %s', ctx.identifier().getText())
             identifier = ctx.identifier().getText()
             obj = self.model.get_identifier(identifier)
             if obj is None:
@@ -194,8 +227,11 @@ class TmspecModelVisitor(tmspecVisitor):
                     parse_context_to_input_context(self.filename, ctx.identifier()))
             return obj
         if ctx.QSTRING():
+            logging.debug('visitValue: QSTRING: %s', ctx.QSTRING().getText())
             return unquote_string(ctx.QSTRING().getText())
         if ctx.getText() == 'true':
+            logging.debug('visitValue: \'true\'')
             return True
         if ctx.getText() == 'false':
+            logging.debug('visitValue: \'false\'')
             return False

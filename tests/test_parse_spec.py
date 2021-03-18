@@ -41,11 +41,12 @@ def test_parse_attribute_types():
 version 0.0;
 zone outside;
 
-component webapp(process): zone=outside, foo='bar\'s baz', https=true, lucky_number=13, cookies;
+component webapp(process): zone=outside, foo='bar\'s baz', https=true, team=red, lucky_number=13, cookies;
 """)
     outside_zone = list(model.zones)[0]
     assert model.components['webapp'].get_attr('cookies') == True
     assert model.components['webapp'].get_attr('https') == True
+    assert model.components['webapp'].get_attr('team') == 'red'
     assert model.components['webapp'].get_attr('lucky_number') == 13
     assert model.components['webapp'].get_attr('foo') == 'bar\'s baz'
     assert model.components['webapp'].get_attr('zone') == outside_zone

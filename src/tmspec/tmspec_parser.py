@@ -6,7 +6,7 @@ from antlr4 import *
 # TODO: remove this?
 from .tmspecLexer import *
 from .tmspecParser import *
-from .TmspecError import *
+from .tmspec_error import *
 from .TmspecModelVisitor import *
 
 class ExceptionErrorListener(ErrorListener):

@@ -50,6 +50,14 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
 
+dfd_nested_zones = parseString("""
+version 0.0;
+zone company;
+zone office: zone=company, network=ethernet;
+
+component database(datastore): zone=office;
+""")
+
 def test_model_query_element_type():
     a = FTOThreatAnalyzer()
     a.set_model(dfd_with_flows)
@@ -84,6 +92,21 @@ def test_model_query_component_zone():
     zone = dfd_with_flows.get_zones()[0]
     components = dfd_with_flows.get_zone_components(zone)
     assert r == [[components[0], zone], [components[1], zone]]
+
+def test_model_query_zone_zone():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_nested_zones)
+    elt = a.variable()
+    value = a.variable()
+    const_zone = a.atom('zone')
+    q = a.query('property', [elt, const_zone, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    office_zone = dfd_nested_zones.zones['office']
+    company_zone = dfd_nested_zones.zones['company']
+    components = dfd_nested_zones.get_zone_components(office_zone)
+    assert r == [[office_zone, company_zone], [components[0], office_zone]]
+
+
 
 def test_model_query_undefined_property():
     a = FTOThreatAnalyzer()

@@ -45,3 +45,20 @@ flow browse_r: user <-- browser;
 """)
     dot = GraphvizDFDRenderer(model).get_dot()
 
+def test_graph_nested_zones():
+    model = parseString("""
+version 0.0;
+zone outside: default;
+zone company;
+zone office: zone=company, network=ethernet;
+component browser(process): zone=outside;
+component webserver(process): zone=company;
+component database(datastore): zone=office;
+
+flow f1: browser --> webserver;
+flow r1: browser <-- webserver;
+flow f2: database --> webserver;
+flow r2: database <-- webserver;
+""")
+    dot = GraphvizDFDRenderer(model).get_dot()
+

@@ -61,7 +61,7 @@ def main(verbose):
 # TODO: output results instead of showing to screen
 # @click.option('-o', '--out-file', type=click.Path(exists=False, allow_dash=True), default='-')
 @click.argument('infile', type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
-def visualize(out_file, infile):
+def visualize(infile):
     try:
         model = parseFile(infile)
         dot = GraphvizDFDRenderer(model).get_dot()

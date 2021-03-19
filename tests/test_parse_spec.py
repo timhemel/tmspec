@@ -131,6 +131,16 @@ zone outside;
 component webapp(process): zone=inside, cookies;
 """)
 
+def test_error_recursive_zone():
+    with pytest.raises(TmspecErrorUnknownIdentifier):
+        model = parseString("""
+version 0.0;
+zone outside: zone=outside;
+
+component webapp(process): zone=inside, cookies;
+""")
+
+
 def test_conflicting_base_types():
     with pytest.raises(TmspecErrorConflictingTypes):
         model = parseString("""

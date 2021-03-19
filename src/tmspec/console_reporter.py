@@ -34,15 +34,18 @@ class ConsoleReporter:
 
     def report(self, results, out_file):
         report_header()
-        if self.params['report_errors']:
-            for i in results.get_errors():
-                report_error_item(i)
-        if self.params['report_questions']:
-            for i in results.get_questions():
-                report_question_item(i)
-        if self.params['report_threats']:
-            for i in results.get_threats():
-                report_threat_item(i)
+        report_items = [
+            (self.params['report_errors'], results.get_errors(), report_error_item),
+            (self.params['report_questions'], results.get_questions(), report_question_item),
+            (self.params['report_threats'], results.get_threats(), report_threat_item),
+        ]
+        for report, items, report_func in report_items:
+            if report:
+                for i in items:
+                    report_func(i)
+            if items != [] and self.params['mode_continue'] == False:
+                break
+
         # click.secho('Errors', fg='red')
         # click.secho('Questions', fg='bright_yellow')
         # click.secho('Threats', fg='magenta')

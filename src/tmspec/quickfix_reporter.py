@@ -1,4 +1,6 @@
 
+import click
+
 from .ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisThreat
 
 def make_error_line(r):
@@ -28,14 +30,18 @@ class QuickfixReporter:
         self.params = params
 
     def report(self, results, out_file):
-        if self.params['report_errors']:
-            outf_errors = errors_file if self.params['errors_file'] else out_file
-            report_items(outf_errors, results.get_errors())
-        if self.params['report_questions']:
-            outf_questions = questions_file if self.params['questions_file'] else out_file
-            report_items(outf_questions, results.get_questions())
-        if self.params['report_threats']:
-            outf_threats = threats_file if self.params['threats_file'] else out_file
-            report_items(outf_threats, results.get_threats())
-
+        rep_items = [
+            (self.params['report_errors'], results.get_errors(), self.params['errors_file']),
+            (self.params['report_questions'], results.get_questions(), self.params['questions_file']),
+            (self.params['report_threats'], results.get_threats(), self.params['threats_file']),
+        ]
+        for report, items, report_file in rep_items:
+            if report:
+                if report_file:
+                    outf_items = click.open_file(report_file, "w")
+                else:
+                    outf_items = out_file
+            report_items(outf_items, items)
+            if items != [] and self.params['mode_continue'] == False:
+                break
 

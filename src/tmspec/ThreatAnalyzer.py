@@ -105,7 +105,7 @@ class ThreatAnalyzer:
 
     def set_prolog_base_functions(self):
         self.query_engine.register_function('property',
-            self.get_element_property)
+            self.get_general_property)
 
         t = ThreatLibrary()
         t.from_string("""
@@ -118,34 +118,29 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
     def add_undefined_property(self, element, key):
         self.undefined_properties.add((element, key))
 
-    def get_element_property(self, element, prop_key, prop_value):
+
+    def get_general_property(self, element, prop_key, prop_value):
         """Answers the query property(element, prop_key, prop_value).
         element, prop_key and prop_value are all prolog data types.
         If the property is not defined, it gets recorded in the
         list of requested but undefined properties, but only if
         prop_key is not a variable.
         """
-        const_element = self.query_engine.atom('element')
-        vtype = self.query_engine.variable()
-        # first unify element(v1, element)
-        for l1 in self.query_engine.match_dynamic(const_element,
-                [element, vtype]):
-            element_value = get_value(element)
-            prop_key_value = get_value(prop_key)
-            if isinstance(prop_key_value, Atom):
-                # property key is a constant value, which means it is
-                # specifically requested.
-                v_prop_value = self.query_engine.variable()
-                q = list(self.query_engine.query('prop', [element_value,
-                    prop_key_value, v_prop_value ]))
-                if q == []:
-                    # property is not defined
-                    self.add_undefined_property(to_python(element_value),
-                        to_python(prop_key_value))
-            const_prop = self.query_engine.atom('prop')
-            for l2 in self.query_engine.match_dynamic(const_prop, [
-                element, prop_key, prop_value]):
-                yield False
+        prop_key_value = get_value(prop_key)
+        if isinstance(prop_key_value, Atom):
+            # property key is a constant value, which means it is
+            # specifically requested.
+            v_prop_value = self.query_engine.variable()
+            q = list(self.query_engine.query('prop', [element,
+                prop_key_value, v_prop_value ]))
+            if q == []:
+                # property is not defined
+                self.add_undefined_property(to_python(element),
+                    to_python(prop_key_value))
+        const_prop = self.query_engine.atom('prop')
+        for l2 in self.query_engine.match_dynamic(const_prop, [
+            element, prop_key, prop_value]):
+            yield False
 
     def set_model(self, model):
         self.model = model
@@ -204,6 +199,9 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             for parent_type in tmtype.get_types():
                 self.add_clause_subtype(tmtype, parent_type)
         for z in self.model.get_zones() + [None]:
+            if z is not None:
+                for key,value in z.get_attributes().items():
+                    self.add_clause_prop(z, key, value)
             for component in self.model.get_zone_components(z):
                 self.add_element_types(component)
                 self.add_element_properties(component)

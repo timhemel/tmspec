@@ -120,6 +120,14 @@ error_descr([modelcheck,'PNOINCFLOW',0],'magic process',
 error([modelcheck,'PNOINCFLOW',0],[X]) :-
 	process(X), dataflow(_,X,_), \+ dataflow(_,_,X).
 
+% PNOOUTFLOW: process has no outgoing flow.
+
+error_descr([modelcheck,'PNOOUTFLOW',0],'process without output',
+   'Process $v1 only consumes data and does not produce any. You may have missed a component that reads from $v1.').
+error([modelcheck,'PNOOUTFLOW',0],[X]) :-
+	process(X), dataflow(_,_,X), \+ dataflow(_,X,_).
+
+
 % DNOOUTFLOW: data store has no outgoing flow.
 
 error_descr([modelcheck, 'DNOOUTFLOW', 0], 'data store not read',

@@ -74,7 +74,7 @@ def defined_before(e1, e2):
 class TmspecModel:
 
     def __init__(self):
-        self.zones = set([])
+        self.zones = {}
         self.components = {}
         self.flows = {}
         self.identifiers = {
@@ -106,12 +106,12 @@ class TmspecModel:
         return self.types.values()
 
     def add_zone(self, zone):
-        self.zones.add(zone)
+        self.zones[zone.name] = zone
         self.identifiers[zone.name] = zone
 
     def get_zones(self):
         # TODO: check if we can preserve parse order
-        return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones ]) ]
+        return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones.values() ]) ]
 
     def get_zone_components(self, z):
         """returns all components for zone z. If z is None, return the unzoned

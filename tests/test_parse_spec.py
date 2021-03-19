@@ -15,7 +15,7 @@ zone outside;
 
 component webapp(process): zone=outside, cookies;
 """)
-    outside_zone = list(model.zones)[0]
+    outside_zone = model.zones['outside']
     types = [t.name for t in model.components['webapp'].get_types()]
     assert types == ['process']
     assert model.components['webapp'].get_attr('cookies') == True
@@ -29,7 +29,7 @@ zone outside;
 // other comment
 component webapp(process): /* todo */ zone=outside, cookies;
 """)
-    outside_zone = list(model.zones)[0]
+    outside_zone = model.zones['outside']
     types = [t.name for t in model.components['webapp'].get_types()]
     assert types == ['process']
     assert model.components['webapp'].get_attr('cookies') == True
@@ -43,13 +43,27 @@ zone outside;
 
 component webapp(process): zone=outside, foo='bar\'s baz', https=true, team=red, lucky_number=13, cookies;
 """)
-    outside_zone = list(model.zones)[0]
+    outside_zone = model.zones['outside']
     assert model.components['webapp'].get_attr('cookies') == True
     assert model.components['webapp'].get_attr('https') == True
     assert model.components['webapp'].get_attr('team') == 'red'
     assert model.components['webapp'].get_attr('lucky_number') == 13
     assert model.components['webapp'].get_attr('foo') == 'bar\'s baz'
     assert model.components['webapp'].get_attr('zone') == outside_zone
+
+
+def test_parse_zone_attributes():
+    model = parseString(r"""
+version 0.0;
+zone company;
+zone office: zone=company, network=ethernet;
+
+component webapp(process): zone=office;
+""")
+    company_zone = model.zones['company']
+    assert model.zones['office'].get_attr('zone') == company_zone
+    assert model.zones['office'].get_attr('network') == 'ethernet'
+
 
 def test_parse_attribute_qstring_ends_with_backslash():
     model = parseString(r"""
@@ -81,7 +95,7 @@ def test_zone_with_attributes():
 version 0.0;
 zone inside : default;
 """)
-    zone = list(model.zones)[0]
+    zone = model.zones['inside']
     assert zone.get_attr('default') == True
 
 def test_element_without_attributes():
@@ -93,7 +107,7 @@ component webapp(compinside);
 component database(compinside);
 flow store: webapp --> database;
 """)
-    zone = list(model.zones)[0]
+    zone = model.zones['inside']
     attrs = model.identifiers['process'].get_attributes()
     attrs['zone'] = zone
     assert model.components['database'].get_attributes() == attrs

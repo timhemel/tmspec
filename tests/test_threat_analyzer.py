@@ -104,7 +104,6 @@ def test_model_query_zone_zone():
     office_zone = dfd_nested_zones.zones['office']
     company_zone = dfd_nested_zones.zones['company']
     components = dfd_nested_zones.get_zone_components(office_zone)
-    print(r)
     assert r == [[office_zone, company_zone], [components[0], office_zone]]
 
 

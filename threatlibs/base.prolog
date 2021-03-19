@@ -123,7 +123,7 @@ error([modelcheck,'PNOINCFLOW',0],[X]) :-
 % DNOOUTFLOW: data store has no outgoing flow.
 
 error_descr([modelcheck, 'DNOOUTFLOW', 0], 'data store not read',
-   'Data store $v1 only stores data, which is pointless. You may have missed a component or external entity that reads from $v1.').
+   'Data store $v1 only stores data and nothing uses it. You may have missed a component or external entity that reads from $v1.').
 error([modelcheck, 'DNOOUTFLOW', 0], [X]) :-
     datastore(X), \+ dataflow(_,X,_).
 

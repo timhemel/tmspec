@@ -1,5 +1,5 @@
 from tmspec.tmspec_parser import *
-from tmspec.GraphvizDFDRenderer import *
+from tmspec.graphviz_dfd_renderer import *
 
 
 def test_component_in_zone():

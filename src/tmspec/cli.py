@@ -10,7 +10,7 @@ from yldprolog.engine import to_python
 from .tmspec_parser import *
 from .ThreatAnalyzer import ThreatAnalyzer
 from .ThreatLibrary import ThreatLibrary
-from .GraphvizDFDRenderer import *
+from .graphviz_dfd_renderer import *
 from .quickfix_reporter import QuickfixReporter
 from .json_reporter import JsonReporter
 from .console_reporter import ConsoleReporter

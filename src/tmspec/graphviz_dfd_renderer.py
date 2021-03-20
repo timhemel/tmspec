@@ -1,4 +1,5 @@
 from graphviz import Digraph
+from itertools import groupby
 from .TmspecModel import *
 
 class GraphvizDFDRenderer:
@@ -12,17 +13,24 @@ class GraphvizDFDRenderer:
 
     def _get_graphviz_attributes(self, element):
         gv_attrs = [(a[3:], v) for a, v in element.get_attributes().items()
-                        if a.startswith('gv_')]
+                        if a.startswith('gv_') and a != 'gv_rank' ]
         return dict(gv_attrs)
 
     def _create_graph(self):
         g = Digraph('G', engine='dot', graph_attr={
+            'concentrate': 'false',
             'fontname': 'Sans',
             'fontsize': '8',
-            'rankdir': 'LR',
-            'splines': 'spline',
+            # 'rankdir': 'LR',
+            'rankdir': 'TB',
+            # 'splines': 'spline',
+            'splines': 'polyline',
+            # 'splines': 'ortho',
             'size': '7.5,10',
             'ratio': 'fill',
+            #'nodesep': '1.0',
+            #'ranksep': '3.0',
+            'outputorder': 'nodesfirst',
         }, node_attr={
             'fontname': 'Sans',
             'fontsize': '12',
@@ -53,7 +61,7 @@ class GraphvizDFDRenderer:
 
     def _render_zones_for_zone(self, graph, zone):
         for z in self.model.get_zones():
-            if z.get_attributes().get('zone') != zone:
+            if z.get_attr('zone') != zone:
                 continue
 
             if z is None:
@@ -84,10 +92,21 @@ class GraphvizDFDRenderer:
                     }
 
             with graph.subgraph(name='cluster_'+zname, graph_attr=cluster_attrs) as cluster:
+
                 zone_components = self.model.get_zone_components(z)
-                for c in zone_components:
-                    node_attrs = self._get_graphviz_attributes(c)
-                    cluster.node(c.name, label=c.name, _attributes=node_attrs)
+
+                ranked_components = groupby(zone_components, key = lambda c : c.get_attr('gv_rank'))
+                for r, components in ranked_components:
+                    if r is None:
+                        for c in components:
+                            node_attrs = self._get_graphviz_attributes(c)
+                            cluster.node(c.name, label=c.name, _attributes=node_attrs)
+                    else:
+                        with cluster.subgraph() as s:
+                            s.attr(rank='same')
+                            for c in components:
+                                node_attrs = self._get_graphviz_attributes(c)
+                                s.node(c.name, label=c.name, _attributes=node_attrs)
 
                 self._render_zones_for_zone(cluster, z)
 

@@ -103,6 +103,7 @@ class TmspecModel:
         return self.identifiers.get(identifier)
 
     def get_types(self):
+        """return all types, not sorted in any particular order."""
         return self.types.values()
 
     def add_zone(self, zone):
@@ -110,18 +111,19 @@ class TmspecModel:
         self.identifiers[zone.name] = zone
 
     def get_zones(self):
-        # TODO: check if we can preserve parse order
+        """return all zones, sorted by their position in the spec file."""
         return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones.values() ]) ]
 
     def get_zone_components(self, z):
-        """returns all components for zone z. If z is None, return the unzoned
-        components."""
+        """return all components for zone z, sorted by their position in the spec file.
+        If z is None, return the unzoned components."""
         return [ x[1] for x in
                 sorted([ (v.get_position(), v)
                     for c,v in self.components.items()
                     if v.get_attr('zone') == z ]) ]
 
     def get_flows(self):
+        """return all data flows, sorted by their position in the spec file."""
         return [ x[1] for x in 
             sorted([ (v.get_position(), v) for v in self.flows.values() ]) ]
 

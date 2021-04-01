@@ -1,0 +1,3 @@
+#!/bin/sh
+
+podman container run -it --rm -v $(pwd):/work:z -w /work antlr4:4.9.1 "$@"

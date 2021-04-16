@@ -67,7 +67,55 @@ threat_descr(['examples', 'THR-001', 0], 'Example threat on data flow $v1', 'Dat
 threat(['examples', 'THR-001', 0], [F,X1,X2]) :- dataflow(F,X1,X2)), property(F,encryption,no).
 ```
 
+## Defining properties
 
+When annotating elements with properties, it can be helpful to validate their values, and to document what these values mean. The following clauses need to be defined for values.
+
+### prop_valid
+
+``` prolog
+prop_valid(ELEMENT, PROPERTY, VALUE).
+```
+
+This states that `VALUE` is a valid value for `PROPERTY` on the element `ELEMENT`. Having the element as a parameter to this clause makes it possible to use different values in different circumstances. For example, the property `encryption` on a dataflow can have different values than on a process, as shown in the code below. Dataflows can have the values `transport`, `message`, and `no`, while non-dataflows can have the values `yes` and `no`:
+
+``` prolog
+prop_valid(X,encryption,transport) :- dataflow(X,_,_).
+prop_valid(X,encryption,message) :- dataflow(X,_,_).
+prop_valid(X,encryption,no) :- dataflow(X,_,_), !.  % if X is a dataflow, stop evaluating
+prop_valid(X,encryption,yes).
+prop_valid(X,encryption,no).
+```
+
+To allow any value, use the following:
+
+``` prolog
+prop_valid(X,protocol,_).
+```
+
+This will allow any value for the property `protocol`.
+
+### prop_text
+
+``` prolog
+prop_text(ELEMENT, PROPERTY, VALUE, TEXT).
+```
+
+Here, `TEXT` describes the meaning of the property `PROPERTY` having the value `VALUE` on element `ELEMENT`. Like `prop_valid`, you can have different texts for a property and its value in different circumstances. The example below gives different texts for dataflows and non-dataflows:
+
+``` prolog
+prop_text(X,encryption,transport,'flow uses transport level encryption').
+prop_text(X,encryption,message,'flow uses message level encryption').
+prop_text(X,encryption,no,'flow has no encryption') :- dataflow(X,_,_), !.
+prop_text(X,encryption,no,'no encryption').
+prop_text(X,encryption,yes,'element has encryption').
+```
+
+For properties with any value:
+
+``` prolog
+prop_text(X,protocol,_,'name of protocol').
+```
 
 ## Prolog clauses created by TMSpec
 

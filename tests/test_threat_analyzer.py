@@ -25,9 +25,6 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
     def query(self, name, args):
         return self.query_engine.query(name, args)
 
-    def get_undefined_properties(self):
-        return self.undefined_properties
-
     def get_model_loading_errors(self):
         return sorted(self.model_loading_errors, key=lambda x: x.elements[0].get_position())
 
@@ -42,13 +39,24 @@ component database(datastore): zone=outside;
 
 dfd_with_flows = parseString("""
 version 0.0;
-type encryptedflow(dataflow): https;
+type encryptedflow(dataflow): https=yes;
 zone outside;
 component webapp(process): zone=outside;
 component database(datastore): zone=outside;
 
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
+
+dfd_with_flows_and_invalid_property = parseString("""
+version 0.0;
+type encryptedflow(dataflow): https=invalid;
+zone outside;
+component webapp(process): zone=outside;
+component database(datastore): zone=outside;
+
+flow store_info(encryptedflow): webapp --> database, pii;
+""")
+
 
 dfd_nested_zones = parseString("""
 version 0.0;
@@ -119,18 +127,55 @@ def test_model_query_undefined_property():
     q = a.query('property', [elt, const_key, value])
     r = [[to_python(elt), to_python(value)] for _ in q]
     assert r == []
-    assert len(a.get_undefined_properties()) == 1
+    assert len(a.undefined_properties) == 1
+    assert len(a.invalid_properties) == 0
 
 def test_model_query_dataflow_has_property():
     a = FTOThreatAnalyzer()
     a.set_model(dfd_with_flows)
+
+    tl = ThreatLibrary()
+    tl.from_string('''
+    prop_valid(X,https,yes).
+    prop_valid(X,https,no).
+    ''')
+    a.add_prolog_rules_from_threat_library(tl)
+
     elt = a.variable()
     value = a.variable()
     const_key = a.atom('https')
     q = a.query('property', [elt, const_key, value])
     r = [[to_python(elt), to_python(value)] for _ in q]
     flows = dfd_with_flows.get_flows()
-    assert r == [[flows[0], True]]
+    assert r == [[flows[0], 'yes']]
+    assert len(a.invalid_properties) == 0
+
+def test_model_query_invalid_dataflow_property():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows_and_invalid_property)
+
+    tl = ThreatLibrary()
+    tl.from_string('''
+    prop_valid(X,https,yes).
+    prop_valid(X,https,no).
+    ''')
+    a.add_prolog_rules_from_threat_library(tl)
+
+    flows = dfd_with_flows_and_invalid_property.get_flows()
+    print(flows)
+    # elt = a.variable()
+    elt = a.atom(flows[0])
+    print(to_python(elt).get_attributes())
+    value = a.variable()
+    const_key = a.atom('https')
+    q = a.query('property', [elt, const_key, value])
+    r = [[to_python(elt), to_python(value)] for _ in q]
+    print(r)
+    assert len(r) == 1
+    assert len(a.undefined_properties) == 0
+    assert len(a.invalid_properties) == 1
+
+
 
 def test_model_query_flow_clause():
     a = FTOThreatAnalyzer()

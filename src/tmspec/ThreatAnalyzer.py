@@ -101,6 +101,7 @@ class ThreatAnalyzer:
         self.threat_libraries = []
         self.set_prolog_base_functions()
         self.undefined_properties = set()
+        self.invalid_properties = set()
         self.model_loading_errors = []
 
     def set_prolog_base_functions(self):
@@ -118,6 +119,11 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
     def add_undefined_property(self, element, key):
         self.undefined_properties.add((element, key))
 
+    def validate_property_value(self, element, prop_key, prop_value):
+        c_valid = self.query_engine.atom('prop_valid')
+        l = list(self.query_engine.query('prop_valid', [element, prop_key, prop_value ]))
+        if l == []:
+            self.invalid_properties.add( (to_python(element), to_python(prop_key), to_python(prop_value)) )  
 
     def get_general_property(self, element, prop_key, prop_value):
         """Answers the query property(element, prop_key, prop_value).
@@ -131,15 +137,15 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             # property key is a constant value, which means it is
             # specifically requested.
             v_prop_value = self.query_engine.variable()
-            q = list(self.query_engine.query('prop', [element,
-                prop_key_value, v_prop_value ]))
+            q = list(self.query_engine.query('prop', [element, prop_key_value, v_prop_value ]))
             if q == []:
                 # property is not defined
-                self.add_undefined_property(to_python(element),
-                    to_python(prop_key_value))
+                self.add_undefined_property(to_python(element), to_python(prop_key_value))
         const_prop = self.query_engine.atom('prop')
-        for l2 in self.query_engine.match_dynamic(const_prop, [
-            element, prop_key, prop_value]):
+        for l2 in self.query_engine.match_dynamic(const_prop, [ element, prop_key, prop_value]):
+            prop_value_value = get_value(prop_value)
+            if isinstance(prop_value_value, Atom):
+                self.validate_property_value(element, prop_key_value, prop_value_value)
             yield False
 
     def set_model(self, model):

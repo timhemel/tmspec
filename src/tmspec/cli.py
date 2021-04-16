@@ -89,6 +89,60 @@ def prolog(threat_libraries, out_file, infiles):
             outf.write(f"%%%% Threat library {tfn}\n\n")
             outf.write(f.read())
 
+@main.command()
+@click.option('-t', '--threat-library', 'threat_libraries', multiple=True, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
+@click.argument('properties', nargs=-1, type=str)
+def property(threat_libraries, properties):
+    """Show help text and values for properties."""
+    a = ThreatAnalyzer()
+    for tf in threat_libraries:
+        t = ThreatLibrary()
+        t.from_prolog_file(tf)
+        a.add_threat_library(t)
+
+    def make_component(e_type):
+        tp = TmType(e_type, None)
+        a.add_clause_type(tp)
+        component = TmComponent(e_type, None)
+        a.add_clause_element(component, tp)
+        return component
+
+    def make_flow(e_type):
+        tp = TmType(e_type, None)
+        a.add_clause_type(tp)
+        flow = TmFlow(e_type, None, None, None)
+        a.add_clause_element(flow, tp)
+        a.add_clause_flow(flow)
+        return flow
+
+    def get_property_help(elt, prop):
+        a_element = a.query_engine.atom(elt)
+        a_property = a.query_engine.atom(prop)
+        v_value = a.query_engine.variable()
+        v_text = a.query_engine.variable()
+        q = a.query_engine.query('prop_help', [a_element, a_property, v_value, v_text])
+        return [ (to_python(v_value), to_python(v_text)) for r in q ]
+
+    elements = [ make_component(e_type) for e_type in [ 'externalentity', 'process', 'datastore']] + [ make_flow('dataflow') ]
+    for p in properties:
+        click.secho(f'Property {p}:', fg='white', bold=True)
+        click.secho('-' * (len(p) + 10), fg='white', bold=True)
+        click.echo()
+
+        docs = [ (elt, get_property_help(elt,p)) for elt in elements ]
+        if all([d[1] == [] for d in docs]):
+            click.secho('Unknown property', fg='red')
+             
+        for elt, hlp in docs:
+            if hlp != []:
+                click.secho(f'For type {elt.name}:')
+                for v,t in hlp:
+                    if v is not None:
+                        click.secho(f'  {v}: {t}')
+                    else:
+                        click.secho(f'  *: {t}')
+            click.echo()
+
 
 @main.command()
 @click.option('-t', '--threat-library', 'threat_libraries', multiple=True, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))

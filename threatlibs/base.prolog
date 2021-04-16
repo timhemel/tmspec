@@ -41,6 +41,21 @@ trusted(X,Y) :- property(X,zone,Z), property(Y,zone,Z).
 untrusted(X,Y) :- \+ trusted(X,Y).
 
 %-----------------------------------------------------------------
+% Help and validation on property values. These can be different
+% per element.
+%
+% To enable validation on property values, define a clause
+% prop_valid(Element,Property,Value) for every valid value.
+%
+% To document what the value means, define a clause
+% prop_text(Element,Property,Value,Text) for every valid value.
+%
+% prop_help is used to gather the documentation for every valid
+% value.
+
+prop_help(X,P,V,T) :- prop_valid(X,P,V), prop_text(X,P,V,T).
+
+%-----------------------------------------------------------------
 % member(A,L) means that A is in list L.
 
 member(A,[A|X]) :- !.

@@ -95,6 +95,8 @@ prop_valid(X,protocol,_).
 
 This will allow any value for the property `protocol`.
 
+For the `zone` property, a validator is automatically created from the model's zones.
+
 ### prop_text
 
 ``` prolog

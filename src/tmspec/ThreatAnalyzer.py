@@ -1,7 +1,7 @@
 
 from string import Template
 import yldprolog.engine
-from yldprolog.engine import get_value, to_python
+from yldprolog.engine import get_value, to_python, unify
 from yldprolog.engine import Atom
 
 from .ThreatLibrary import ThreatLibrary
@@ -118,6 +118,7 @@ class ThreatAnalyzer:
     def set_prolog_base_functions(self):
         self.query_engine.register_function('property',
             self.get_general_property)
+        self.query_engine.register_function('prop_valid', self.prop_valid_zones)
 
         t = ThreatLibrary()
         t.from_string("""
@@ -165,6 +166,14 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
 
         for l2 in self.query_engine.query('prop', [ element, prop_key, prop_value]):
             yield False
+
+    def prop_valid_zones(self, element, prop_key, prop_value):
+        v1 = self.query_engine.variable()
+        for l0 in unify(v1, element):
+            for l1 in unify(prop_key,self.query_engine.atom('zone')):
+                for z in self.model.get_zones():
+                    for l2 in unify(prop_value,self.query_engine.atom(z)):
+                        yield False
 
     def set_model(self, model):
         self.model = model

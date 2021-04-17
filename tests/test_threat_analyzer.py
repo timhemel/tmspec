@@ -114,7 +114,23 @@ def test_model_query_zone_zone():
     components = dfd_nested_zones.get_zone_components(office_zone)
     assert r == [[office_zone, company_zone], [components[0], office_zone]]
 
+def test_model_zone_valid_values():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_nested_zones)
 
+    add_threat_library_from_source(a, '''
+    prop_valid(X,https,yes).
+    prop_valid(X,https,no).
+    ''')
+
+    z = dfd_nested_zones.get_zones()[1]
+    elt = dfd_nested_zones.get_zone_components(z)[0]
+    elt = a.variable()
+    value = a.variable()
+    const_zone = a.atom('zone')
+    q = a.query('prop_valid', [elt, const_zone, value])
+    r = [ to_python(value) for _ in q ]
+    assert r == dfd_nested_zones.get_zones()
 
 def test_model_query_undefined_property():
     a = FTOThreatAnalyzer()
@@ -134,12 +150,10 @@ def test_model_query_dataflow_has_property():
     a = FTOThreatAnalyzer()
     a.set_model(dfd_with_flows)
 
-    tl = ThreatLibrary()
-    tl.from_string('''
+    add_threat_library_from_source(a, '''
     prop_valid(X,https,yes).
     prop_valid(X,https,no).
     ''')
-    a.add_prolog_rules_from_threat_library(tl)
 
     elt = a.variable()
     value = a.variable()

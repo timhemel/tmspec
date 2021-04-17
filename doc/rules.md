@@ -104,8 +104,8 @@ prop_text(ELEMENT, PROPERTY, VALUE, TEXT).
 Here, `TEXT` describes the meaning of the property `PROPERTY` having the value `VALUE` on element `ELEMENT`. Like `prop_valid`, you can have different texts for a property and its value in different circumstances. The example below gives different texts for dataflows and non-dataflows:
 
 ``` prolog
-prop_text(X,encryption,transport,'flow uses transport level encryption').
-prop_text(X,encryption,message,'flow uses message level encryption').
+prop_text(X,encryption,transport,'flow uses transport level encryption') :- dataflow(X,_,_).
+prop_text(X,encryption,message,'flow uses message level encryption') :- dataflow(X,_,_).
 prop_text(X,encryption,no,'flow has no encryption') :- dataflow(X,_,_), !.
 prop_text(X,encryption,no,'no encryption').
 prop_text(X,encryption,yes,'element has encryption').

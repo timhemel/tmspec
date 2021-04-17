@@ -17,6 +17,7 @@ class JsonReporter:
             'version': '0.0',
             'errors': [make_json_report_item(i) for i in results.get_errors()],
             'questions': [make_json_report_item(i) for i in results.get_questions()],
+            'warnings': [make_json_report_item(i) for i in results.get_warnings()],
             'threats': [make_json_report_item(i) for i in results.get_threats()],
         }
         json.dump(self.report, out_file, sort_keys=True, indent=4)

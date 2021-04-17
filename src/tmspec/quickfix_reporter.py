@@ -1,7 +1,7 @@
 
 import click
 
-from .ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisThreat
+from .ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisWarning, ThreatAnalysisThreat
 
 def make_error_line(r):
     # filename:line:column:message
@@ -11,6 +11,8 @@ def make_error_line(r):
         result_type = 'ERROR'
     elif isinstance(r, ThreatAnalysisQuestion):
         result_type = 'QUESTION'
+    elif isinstance(r, ThreatAnalysisWarning):
+        result_type = 'WARNING'
     elif isinstance(r, ThreatAnalysisThreat):
         result_type = 'THREAT'
     long_descr = "\n".join(['   '+l
@@ -33,6 +35,7 @@ class QuickfixReporter:
         rep_items = [
             (self.params['report_errors'], results.get_errors(), self.params['errors_file']),
             (self.params['report_questions'], results.get_questions(), self.params['questions_file']),
+            (self.params['report_warnings'], results.get_warnings(), self.params['warnings_file']),
             (self.params['report_threats'], results.get_threats(), self.params['threats_file']),
         ]
         for report, items, report_file in rep_items:

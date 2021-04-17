@@ -153,13 +153,15 @@ def property(threat_libraries, properties):
 @click.option('--continue/--no-continue', 'mode_continue', default=False)
 @click.option('--errors/--no-errors', 'report_errors', default=True)
 @click.option('--questions/--no-questions', 'report_questions', default=True)
+@click.option('--warnings/--no-warnings', 'report_warnings', default=True)
 @click.option('--threats/--no-threats', 'report_threats', default=True)
 @click.option('--errors-file', type=click.Path(exists=False, allow_dash=True))
 @click.option('--questions-file', type=click.Path(exists=False, allow_dash=True))
+@click.option('--warnings-file', type=click.Path(exists=False, allow_dash=True))
 @click.option('--threats-file', type=click.Path(exists=False, allow_dash=True))
 @click.argument('infiles', nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
 @click.pass_context
-def analyze(ctx, threat_libraries, out_file, output_format, mode_continue, report_errors, report_questions, report_threats, errors_file, questions_file, threats_file, infiles):
+def analyze(ctx, threat_libraries, out_file, output_format, mode_continue, report_errors, report_questions, report_warnings, report_threats, errors_file, questions_file, warnings_file, threats_file, infiles):
 
     if output_format == 'console':
         reporter = ConsoleReporter(ctx.params)
@@ -171,7 +173,10 @@ def analyze(ctx, threat_libraries, out_file, output_format, mode_continue, repor
     if out_file is not None:
         outf = click.open_file(out_file, "w")
     else:
-        outf = sys.stderr
+        if output_format != 'json':
+            outf = sys.stderr
+        else:
+            outf = sys.stdout
 
     for infile in infiles:
         try:

@@ -14,8 +14,15 @@ def report_error_item(i):
     click.secho(f"\n{lines}")
     click.echo()
 
+def report_warning_item(i):
+    click.secho('WARNING:', fg='yellow', bold=True)
+    click.secho(f"   {i.get_short_description()}", fg='white', bold=True)
+    lines = "\n".join(["   " + x for x in i.get_long_description().split('\r\n')])
+    click.secho(f"\n{lines}")
+    click.echo()
+
 def report_question_item(i):
-    click.secho('QUESTION:', fg='yellow', bold=True)
+    click.secho('QUESTION:', fg='cyan', bold=True)
     click.secho(f"   {i.get_short_description()}", fg='white', bold=True)
     lines = "\n".join(["   " + x for x in i.get_long_description().split('\r\n')])
     click.secho(f"\n{lines}")
@@ -37,6 +44,7 @@ class ConsoleReporter:
         report_items = [
             (self.params['report_errors'], results.get_errors(), report_error_item),
             (self.params['report_questions'], results.get_questions(), report_question_item),
+            (self.params['report_warnings'], results.get_warnings(), report_warning_item),
             (self.params['report_threats'], results.get_threats(), report_threat_item),
         ]
         for report, items, report_func in report_items:

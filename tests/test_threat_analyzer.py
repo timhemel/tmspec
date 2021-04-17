@@ -326,6 +326,28 @@ def test_model_analyze_errors_twice():
     assert r.get_questions() == []
     assert len(r.get_errors()) == 1
 
+def test_model_analyze_warnings():
+    a = FTOThreatAnalyzer()
+    a.set_model(dfd_with_flows_and_invalid_property)
+
+    add_threat_library_from_source(a, threatlib_base_code)
+
+    add_threat_library_from_source(a, '''
+    prop_valid(X,https,yes).
+    prop_valid(X,https,no).
+    threat_descr(['test', '001', 0], 'Test threat', 'This is a threat to test').
+    threat(['test', '001', 0], [X]) :-
+        dataflow(X), property(X,'https',no).
+    ''')
+
+    r = a.analyze()
+    assert r.get_threats() == []
+    assert r.get_questions() == []
+    assert r.get_errors() == []
+    assert len(r.get_warnings()) == 1
+
+
+
 # test that templating works in short description of threats and errors
 def test_model_result_short_descr_templating():
     a = FTOThreatAnalyzer()

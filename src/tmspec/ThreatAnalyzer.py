@@ -59,6 +59,10 @@ class ThreatAnalysisError(ThreatAnalysisResultItem):
 
     pass
 
+class ThreatAnalysisWarning(ThreatAnalysisResultItem):
+
+    pass
+
 class ThreatAnalysisThreat(ThreatAnalysisResultItem):
 
     pass
@@ -75,6 +79,7 @@ class AnalysisResult:
         self.errors = []
         self.threats = []
         self.questions = []
+        self.warnings = []
 
     def get_errors(self):
         return self.errors
@@ -85,8 +90,14 @@ class AnalysisResult:
     def get_questions(self):
         return self.questions
 
+    def get_warnings(self):
+        return self.warnings
+
     def add_errors(self, errors):
         self.errors += errors
+
+    def add_warnings(self, warnings):
+        self.warnings += warnings
 
     def add_threats(self, threats):
         self.threats += threats
@@ -125,6 +136,13 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
         if l == []:
             self.invalid_properties.add( (to_python(element), to_python(prop_key), to_python(prop_value)) )  
 
+    def validate_defined_property(self, element, prop_key):
+        v_prop_value = self.query_engine.variable()
+        for r in self.query_engine.query('prop', [element, prop_key, v_prop_value]):
+            prop_value = get_value(v_prop_value)
+            if isinstance(prop_value, Atom):
+                self.validate_property_value(element, prop_key, prop_value)
+
     def get_general_property(self, element, prop_key, prop_value):
         """Answers the query property(element, prop_key, prop_value).
         element, prop_key and prop_value are all prolog data types.
@@ -141,11 +159,11 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             if q == []:
                 # property is not defined
                 self.add_undefined_property(to_python(element), to_python(prop_key_value))
-        const_prop = self.query_engine.atom('prop')
-        for l2 in self.query_engine.match_dynamic(const_prop, [ element, prop_key, prop_value]):
-            prop_value_value = get_value(prop_value)
-            if isinstance(prop_value_value, Atom):
-                self.validate_property_value(element, prop_key_value, prop_value_value)
+
+            else:
+                self.validate_defined_property(element, prop_key_value)
+
+        for l2 in self.query_engine.query('prop', [ element, prop_key, prop_value]):
             yield False
 
     def set_model(self, model):
@@ -252,6 +270,14 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
                 '''The property %s is not defined on element $v1.''' % prop))
         return questions
 
+    def make_warnings_from_invalid_properties(self):
+        warnings = []
+        for element, prop, value in self.invalid_properties:
+            short_descr = f'invalid property value for {prop}: {value}'
+            long_descr = f'The property {prop} on element $v1 has an invalid value {value}.'
+            warnings.append(ThreatAnalysisWarning('PROPINVALID', [element], short_descr, long_descr))
+        return warnings
+
     def analyze(self):
         errors = [ self.make_error(i) for i in self.query_for_issues('error') ]
         threats = [ self.make_threat(i) for i in self.query_for_issues('threat') ]
@@ -261,5 +287,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
         ar.add_threats(threats)
         questions = self.make_questions_from_undefined_properties()
         ar.add_questions(questions)
+        warnings = self.make_warnings_from_invalid_properties()
+        ar.add_warnings(warnings)
         return ar
 

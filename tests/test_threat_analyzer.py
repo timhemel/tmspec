@@ -162,19 +162,14 @@ def test_model_query_invalid_dataflow_property():
     a.add_prolog_rules_from_threat_library(tl)
 
     flows = dfd_with_flows_and_invalid_property.get_flows()
-    print(flows)
-    # elt = a.variable()
     elt = a.atom(flows[0])
-    print(to_python(elt).get_attributes())
     value = a.variable()
     const_key = a.atom('https')
     q = a.query('property', [elt, const_key, value])
     r = [[to_python(elt), to_python(value)] for _ in q]
-    print(r)
     assert len(r) == 1
     assert len(a.undefined_properties) == 0
     assert len(a.invalid_properties) == 1
-
 
 
 def test_model_query_flow_clause():

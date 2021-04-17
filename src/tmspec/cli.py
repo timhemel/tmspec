@@ -120,11 +120,12 @@ def property(threat_libraries, properties):
         a_property = a.query_engine.atom(prop)
         v_value = a.query_engine.variable()
         v_text = a.query_engine.variable()
-        q = a.query_engine.query('prop_help', [a_element, a_property, v_value, v_text])
+        q = a.query_engine.query('prop_text', [a_element, a_property, v_value, v_text])
         return [ (to_python(v_value), to_python(v_text)) for r in q ]
 
     elements = [ make_component(e_type) for e_type in [ 'externalentity', 'process', 'datastore']] + [ make_flow('dataflow') ]
     for p in properties:
+        click.echo()
         click.secho(f'Property {p}:', fg='white', bold=True)
         click.secho('-' * (len(p) + 10), fg='white', bold=True)
         click.echo()

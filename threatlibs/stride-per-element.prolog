@@ -2,6 +2,11 @@
 %
 %
 
+prop_valid(X,stores_logs,yes) :- datastore(X).
+prop_valid(X,stores_logs,no) :- datastore(X).
+prop_text(X,stores_logs,yes,'The datastore contains log information.') :- datastore(X).
+prop_text(X,stores_logs,no,'The datastore does not contain log information.') :- datastore(X).
+
 threat_descr(['stride-per-element',spoof_external_entity,0],
   'Spoof external entity',
   'An attacker pretends to be the external entity $v1.').

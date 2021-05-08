@@ -1,42 +1,37 @@
 syntax clear
 syntax case match
 
+
 syntax keyword tmspecDirectiveKeyword version include contained skipwhite
 syntax region tmspecDirective start=/version\|include/ end=/;/ contains=tmspecDirectiveKeyword,tmspecInlineComment
+syntax keyword tmspecDeclarationKeyword zone component type flow contained skipwhite
+syntax region tmspecDeclaration start=/\(zone\|component\|type\|flow\)\s*/ end=/;/ contains=tmspecNonflowStatement,tmspecFlowStatement,tmspecInlineComment keepend skipwhite
 
-syntax region tmspecDeclaration start=/\(zone\|component\|type\|flow\)\s*/ end=/;/ contains=tmspecDeclStatement,tmspecDeclStatementFlow,tmspecInlineComment keepend skip=tmspecInlineComment
+syntax region tmspecNonflowStatement start=/\(zone\|component\|type\)/ end=/;/ contained contains=tmspecDeclarationKeyword,tmspecDeclNameType,tmspecDeclBody,tmspecInlineComment skipwhite keepend
+syntax region tmspecFlowStatement start=/flow/ end=/;/ contained contains=tmspecDeclarationKeyword,tmspecDeclNameType,tmspecDeclFlowBody,tmspecInlineComment skipwhite keepend
 
-syntax match tmspecDeclStatement /\(zone\|component\|type\)/ contained nextgroup=tmspecDeclNameType skipwhite
-syntax match tmspecDeclNameType /[A-Za-z0-9_@]\+\(([^)]*)\)\?/ contained contains=tmspecDeclName,tmspecInlineComment nextgroup=tmspecDeclBody
-syntax region tmspecDeclBody start=/:/ end=/;/ contained contains=tmspecProperty,tmspecInlineComment keepend skipwhite
+syntax region tmspecDeclNameType start=/[A-Za-z0-9_@]\+/ end=/\(([^)]*)\)\?/ contained contains=tmspecDeclName,tmspecDeclTypes,tmspecInlineComment
 
-syntax match tmspecDeclStatementFlow /flow/ contained nextgroup=tmspecDeclNameTypeFlow skipwhite
-syntax match tmspecDeclNameTypeFlow /[A-Za-z0-9_@]\+\(([^)]*)\)\?/ contained contains=tmspecDeclName nextgroup=tmspecDeclBodyFlow
-syntax region tmspecDeclBodyFlow start=/:/ end=/;/ contained contains=tmspecFlow,tmspecInlineComment keepend skipwhite
+syntax region tmspecDeclBody start=/:/ end=/;/ contained contains=tmspecIdentifier,tmspecString,tmspecAssign,tmspecInlineComment keepend skipwhite
+syntax region tmspecDeclFlowBody start=/:/ end=/;/ contained contains=tmspecIdentifier,tmspecString,tmspecArrow,tmspecAssign,tmspecInlineComment keepend skipwhite
 
-syntax match tmspecDeclName /[A-Za-z0-9_@]\+/ contained nextgroup=tmspecInherit skipwhite
-syntax match tmspecInherit /([^)]*)\|/ contained skipwhite contains=tmspecType,tmspecInlineComment
+syntax match tmspecDeclName /[A-Za-z0-9_@]\+/ contained
+syntax match tmspecDeclTypes "([^)]*)" contained skipwhite contains=tmspecType,tmspecInlineComment
+
 syntax match tmspecType /[A-Za-z0-9_@]\+/ contained
-
-" syntax match tmspecFlow /\([A-Za-z0-9_@]\+\s*\(-->\|<--\)\s*[A-Za-z0-9_@]\+\s*[,;]\)/ contained nextgroup=tmspecProperty skipwhite contains=tmspecArrow,tmspecIdentifier,tmspecInlineComment
-syntax match tmspecFlow /.*\(-->\|<--\).*[,;]/ contained nextgroup=tmspecProperty skipwhite contains=tmspecArrow,tmspecIdentifier,tmspecInlineComment
-syntax region tmspecProperty start=/[A-Za-z0-9_@]\|'/ end=/[,;]/ contained contains=tmspecIdentifier,tmspecString,tmspecAssign,tmspecInlineComment nextgroup=tmspecProperty skipwhite
 
 syntax match tmspecArrow /-->\|<--/ contained skipwhite
 syntax match tmspecIdentifier /[A-Za-z0-9_@]\+/ contained 
 syntax match tmspecAssign /=/ contained
 
 syntax match tmspecComment /#.*/
-" TODO: /* comment */
 syntax region tmspecInlineComment start="/\*" end="\*/"
 syntax region tmspecString start=/'/ skip=/\\'/ end=/'/
 
 highlight link tmspecArrow Operator
 highlight link tmspecAssign Operator
-highlight link tmspecOperator Operator
-highlight link tmspecDeclStatement Statement
-highlight link tmspecDeclStatementFlow Statement
 highlight link tmspecDirectiveKeyword PreProc
+highlight link tmspecDeclarationKeyword Statement
 highlight link tmspecString String
 highlight link tmspecIdentifier Identifier
 highlight link tmspecDeclName Function

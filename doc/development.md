@@ -25,7 +25,7 @@ Then, create parsers for java and compile them:
 
 ```
 $ cd grammar-test
-$ antlr4 -Dlanguage=java tmspec.g4
+$ antlr4 -Dlanguage=Java tmspec.g4
 $ javac -cp /usr/local/lib/antlr4-tool.jar tmspec*.java
 ```
 

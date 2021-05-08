@@ -124,8 +124,8 @@ def property(threat_libraries, properties):
         return [ (to_python(v_value), to_python(v_text)) for r in q ]
 
     elements = [ make_component(e_type) for e_type in [ 'externalentity', 'process', 'datastore']] + [ make_flow('dataflow') ]
+    click.echo()
     for p in properties:
-        click.echo()
         click.secho(f'Property {p}:', fg='white', bold=True)
         click.secho('-' * (len(p) + 10), fg='white', bold=True)
         click.echo()
@@ -142,7 +142,8 @@ def property(threat_libraries, properties):
                         click.secho(f'  {v}: {t}')
                     else:
                         click.secho(f'  *: {t}')
-            click.echo()
+                click.echo()
+    click.echo()
 
 
 @main.command()

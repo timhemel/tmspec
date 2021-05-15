@@ -13,15 +13,15 @@ class TmElementWithAttributes(TmElement):
         super(TmElementWithAttributes, self).__init__(name)
         self.parents = parents
         self._attrs = attrs
-        self._input_ctx = input_ctx
+        self.input_ctx = input_ctx
 
     @property
     def position(self):
-        return self._input_ctx.position
+        return self.input_ctx.position
 
     @property
     def filename(self):
-        return self._input_ctx.filename
+        return self.input_ctx.filename
 
     def __getitem__(self, key):
         try:
@@ -60,11 +60,11 @@ class TmType(TmElementWithAttributes):
 
     def get_base_types(self):
         if self.parents:
-            base_types = set([])
+            base_types = set()
             for t in self.parents:
                 base_types.update(t.get_base_types())
             return base_types
-        return set([self.name])
+        return { self.name }
 
 class TmFlow(TmElementWithAttributes):
 

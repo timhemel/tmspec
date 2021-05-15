@@ -126,8 +126,7 @@ class ThreatAnalyzer:
             self.get_general_property)
         self.query_engine.register_function('prop_valid', self.prop_valid_zones)
 
-        t = ThreatLibrary()
-        t.from_string("""
+        t = ThreatLibrary.from_string("""
 report_error(Issue, Elements, ShortDescr, LongDescr) :-
     error(Issue,Elements), error_descr(Issue, ShortDescr, LongDescr).
 report_threat(Issue, Elements, ShortDescr, LongDescr) :-

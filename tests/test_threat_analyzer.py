@@ -168,8 +168,7 @@ def test_model_query_invalid_dataflow_property():
     a = FTOThreatAnalyzer()
     a.set_model(dfd_with_flows_and_invalid_property)
 
-    tl = ThreatLibrary()
-    tl.from_string('''
+    tl = ThreatLibrary.from_string('''
     prop_valid(X,https,yes).
     prop_valid(X,https,no).
     ''')
@@ -234,8 +233,7 @@ def test_error_component_model_loading_errors():
 def test_analyzer_loads_script():
     a = FTOThreatAnalyzer()
     a.set_model(dfd_with_flows)
-    tl = ThreatLibrary()
-    tl.from_string('animal(monkey).')
+    tl = ThreatLibrary.from_string('animal(monkey).')
     a.add_prolog_rules_from_threat_library(tl)
     v = a.variable()
     q = a.query('animal', [v])
@@ -280,8 +278,7 @@ error(['test', '002', 0], [X]) :- process(X).
 
 
 def add_threat_library_from_source(analyzer, source):
-    t = ThreatLibrary()
-    t.from_string(source)
+    t = ThreatLibrary.from_string(source)
     analyzer.add_threat_library(t)
 
 def test_model_threats_multiple_libraries():

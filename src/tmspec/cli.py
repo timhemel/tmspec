@@ -43,8 +43,7 @@ def analyze_specfile(infile, threat_libraries):
     a.set_model(model)
     for tfn in threat_libraries:
         p = pathlib.Path(tfn)
-        t = ThreatLibrary()
-        t.from_prolog_file(p)
+        t = ThreatLibrary.from_prolog_file(p)
         a.add_threat_library(t)
     results = a.analyze()
     return results
@@ -96,8 +95,7 @@ def property(threat_libraries, properties):
     """Show help text and values for properties."""
     a = ThreatAnalyzer()
     for tf in threat_libraries:
-        t = ThreatLibrary()
-        t.from_prolog_file(tf)
+        t = ThreatLibrary.from_prolog_file(tf)
         a.add_threat_library(t)
 
     def make_component(e_type):

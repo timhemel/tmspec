@@ -219,7 +219,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
         self.query_engine.assert_fact(c_flow, [a_flow, a_source, a_target])
 
     def add_element_types(self, element):
-        for element_type in element.get_types():
+        for element_type in element.types:
             self.add_clause_element(element, element_type)
 
     def add_element_properties(self, element):
@@ -229,7 +229,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
     def add_prolog_facts_from_model(self):
         for tmtype in self.model.get_types():
             self.add_clause_type(tmtype)
-            for parent_type in tmtype.get_types():
+            for parent_type in tmtype.types:
                 self.add_clause_subtype(tmtype, parent_type)
         for z in self.model.get_zones() + [None]:
             if z is not None:

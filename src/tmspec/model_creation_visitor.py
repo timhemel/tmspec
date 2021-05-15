@@ -169,11 +169,11 @@ class TmspecModelVisitor(tmspecVisitor):
             obj = self._resolve_object(c, True)
             obj = self._as_type(obj)
             if len(base_types) == 0:
-                base_types.update(obj.get_base_types())
+                base_types.update(obj.base_types)
                 base_type = list(base_types)[0]
             else:
                 base_type = list(base_types)[0]
-                base_types.update(obj.get_base_types())
+                base_types.update(obj.base_types)
             if type_restrictions is not None and base_type not in type_restrictions:
                 raise TmspecErrorInvalidType(
                     f'type {obj.name} derived from {base_type}, but must be derived from {", ".join(type_restrictions)}',

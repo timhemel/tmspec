@@ -75,7 +75,7 @@ def test_model_query_element_type():
     value = a.variable()
     q = a.query('element', [elt, value])
     r = [[to_python(elt), to_python(value) ] for _ in q]
-    assert r == [[components[0], components[0].get_types()[0]]]
+    assert r == [[components[0], components[0].types[0]]]
 
     
 def test_model_query_element_type_inherited():
@@ -87,7 +87,7 @@ def test_model_query_element_type_inherited():
     value = a.variable()
     q = a.query('element', [elt, value])
     r = [[to_python(elt), to_python(value)] for _ in q]
-    assert r == [[flows[0], flows[0].get_types()[0]]]
+    assert r == [[flows[0], flows[0].types[0]]]
 
 def test_model_query_component_zone():
     a = FTOThreatAnalyzer()
@@ -214,8 +214,8 @@ def test_model_subtypes_defined():
     parent_type = a.variable()
     q = a.query('subtype', [tmtype, parent_type])
     r = [[to_python(tmtype), to_python(parent_type)] for _ in q]
-    tmtype = dfd_with_flows.get_flows()[0].get_types()[0]
-    assert r == [[tmtype, t] for t in tmtype.get_types()]
+    tmtype = dfd_with_flows.get_flows()[0].types[0]
+    assert r == [[tmtype, t] for t in tmtype.types]
 
 def find_component_by_name(model, name):
     l = [

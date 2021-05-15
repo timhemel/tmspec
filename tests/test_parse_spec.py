@@ -16,7 +16,7 @@ zone outside;
 component webapp(process): zone=outside, cookies;
 """)
     outside_zone = model.zones['outside']
-    types = [t.name for t in model.components['webapp'].get_types()]
+    types = [t.name for t in model.components['webapp'].types]
     assert types == ['process']
     assert model.components['webapp'].get('cookies') == True
     assert model.components['webapp'].get('zone') == outside_zone
@@ -30,7 +30,7 @@ zone outside;
 component webapp(process): /* todo */ zone=outside, cookies;
 """)
     outside_zone = model.zones['outside']
-    types = [t.name for t in model.components['webapp'].get_types()]
+    types = [t.name for t in model.components['webapp'].types]
     assert types == ['process']
     assert model.components['webapp'].get('cookies') == True
     assert model.components['webapp'].get('zone') == outside_zone
@@ -291,7 +291,7 @@ type secretstore(encryptedstore): sensitive;
 zone outside;
 component login(secretstore): zone=outside;
 """)
-    types = model.components['login'].get_types()
+    types = model.components['login'].types
     assert [t.name for t in types] == ['secretstore']
 
 def test_component_type_has_multiple_direct_parents():
@@ -302,7 +302,7 @@ type privatestore(datastore): pii;
 zone outside;
 component login(encryptedstore,privatestore): zone=outside;
 """)
-    types = model.components['login'].get_types()
+    types = model.components['login'].types
     assert [t.name for t in types] == ['encryptedstore', 'privatestore']
 
 def test_component_cannot_be_flow():
@@ -386,7 +386,7 @@ component database(datastore): zone=outside;
 
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
-    types = [t.name for t in model.flows['store_info'].get_types()]
+    types = [t.name for t in model.flows['store_info'].types]
     assert types == ['encryptedflow']
 
 def test_derived_type_has_type():
@@ -399,7 +399,7 @@ component database(datastore): zone=outside;
 
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
-    types = [t.name for t in model.types['encryptedflow'].get_types()]
+    types = [t.name for t in model.types['encryptedflow'].types]
     assert types == ['dataflow']
 
 def test_element_has_position():

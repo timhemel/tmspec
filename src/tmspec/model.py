@@ -11,7 +11,7 @@ class TmElementWithAttributes(TmElement):
 
     def __init__(self, name, input_ctx, parents=[], attrs={}):
         super(TmElementWithAttributes, self).__init__(name)
-        self.parents = parents
+        self._parents = parents
         self._attrs = attrs
         self.input_ctx = input_ctx
 
@@ -27,7 +27,7 @@ class TmElementWithAttributes(TmElement):
         try:
             return self._attrs[key]
         except KeyError:
-            for p in self.parents:
+            for p in self._parents:
                 try:
                     return p[key]
                 except KeyError:
@@ -43,13 +43,14 @@ class TmElementWithAttributes(TmElement):
     @property
     def attributes(self):
         d = {}
-        for p in reversed(self.parents):
+        for p in reversed(self._parents):
             d.update(p.attributes)
         d.update(self._attrs)
         return d
 
-    def get_types(self):
-        return self.parents
+    @property
+    def types(self):
+        return self._parents
 
 class TmComponent(TmElementWithAttributes):
 
@@ -58,13 +59,11 @@ class TmComponent(TmElementWithAttributes):
 
 class TmType(TmElementWithAttributes):
 
-    def get_base_types(self):
-        if self.parents:
-            base_types = set()
-            for t in self.parents:
-                base_types.update(t.get_base_types())
-            return base_types
-        return { self.name }
+    @property
+    def base_types(self):
+        if self.types == []:
+            return { self.name }
+        return set().union( *(t.base_types for t in self.types ))
 
 class TmFlow(TmElementWithAttributes):
 

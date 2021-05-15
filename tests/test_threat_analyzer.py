@@ -3,7 +3,7 @@ import re
 from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
 
-# from tmspec.tmspec_error import *
+# from tmspec.error import *
 from tmspec.parser import parseString
 from tmspec.threat_analyzer import ThreatAnalyzer
 from tmspec.threat_library import ThreatLibrary

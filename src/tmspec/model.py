@@ -1,4 +1,4 @@
-from .tmspec_error import *
+from .error import *
 
 import pkg_resources
 import os

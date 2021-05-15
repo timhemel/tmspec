@@ -4,7 +4,7 @@ from antlr4.error.ErrorListener import ErrorListener
 import tempfile
 import os
 
-from tmspec.tmspec_error import *
+from tmspec.error import *
 from tmspec.parser import *
 
 

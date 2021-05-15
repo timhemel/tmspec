@@ -227,7 +227,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             self.add_clause_prop(element, key, value)
 
     def add_prolog_facts_from_model(self):
-        for tmtype in self.model.get_types():
+        for tmtype in self.model.types.values():
             self.add_clause_type(tmtype)
             for parent_type in tmtype.types:
                 self.add_clause_subtype(tmtype, parent_type)

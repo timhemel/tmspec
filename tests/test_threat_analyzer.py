@@ -204,8 +204,7 @@ def test_model_types_defined():
     tmtype = a.variable()
     q = a.query('type', [name, tmtype])
     r = [[to_python(name), to_python(tmtype)] for _ in q]
-    types = dfd_with_flows.get_types()
-    assert r == [[t.name, t] for t in types]
+    assert r == [[t.name, t] for t in dfd_with_flows.types.values()]
 
 def test_model_subtypes_defined():
     a = FTOThreatAnalyzer()

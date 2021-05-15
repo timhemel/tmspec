@@ -110,10 +110,6 @@ class TmspecModel:
     def get_identifier(self, identifier):
         return self.identifiers.get(identifier)
 
-    def get_types(self):
-        """return all types, not sorted in any particular order."""
-        return self.types.values()
-
     def get_zones(self):
         """return all zones, sorted by their position in the spec file."""
         return [ x[1] for x in sorted([ (z.position, z) for z in self.zones.values() ]) ]

@@ -1,5 +1,5 @@
 from .tmspecVisitor import tmspecVisitor
-from .TmspecModel import *
+from .model import *
 import logging
 
 def unquote_string(s):

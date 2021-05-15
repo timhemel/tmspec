@@ -1,6 +1,6 @@
 from graphviz import Digraph
 from itertools import groupby
-from .TmspecModel import *
+from .model import *
 
 class GraphvizDFDRenderer:
 

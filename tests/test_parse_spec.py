@@ -5,7 +5,7 @@ import tempfile
 import os
 
 from tmspec.tmspec_error import *
-from tmspec.tmspec_parser import *
+from tmspec.parser import *
 
 
 def test_parse():

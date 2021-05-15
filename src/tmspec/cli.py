@@ -7,7 +7,7 @@ import logging
 
 from yldprolog.engine import to_python
 
-from .tmspec_parser import *
+from .parser import *
 from .threat_analyzer import ThreatAnalyzer
 from .threat_library import ThreatLibrary
 from .graphviz_dfd_renderer import *

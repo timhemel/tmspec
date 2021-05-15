@@ -7,7 +7,7 @@ from antlr4 import *
 from .tmspecLexer import *
 from .tmspecParser import *
 from .tmspec_error import *
-from .TmspecModelVisitor import *
+from .model_creation_visitor import *
 
 class ExceptionErrorListener(ErrorListener):
 

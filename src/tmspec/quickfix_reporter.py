@@ -1,7 +1,7 @@
 
 import click
 
-from .ThreatAnalyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisWarning, ThreatAnalysisThreat
+from .threat_analyzer import ThreatAnalysisError, ThreatAnalysisQuestion, ThreatAnalysisWarning, ThreatAnalysisThreat
 
 def make_error_line(r):
     # filename:line:column:message

@@ -177,6 +177,16 @@ zone outside;
 component webapp(process, encryptedstore): zone=outside;
 """)
 
+def test_ok_derived_types():
+    model = parseString("""
+version 0.0;
+type encryptedstore(datastore): encryption;
+zone outside;
+component webapp(encryptedstore, datastore): zone=outside;
+""")
+    assert model.components['webapp'].get('encryption') == True
+
+
 def test_component_identifier_already_used():
     with pytest.raises(TmspecErrorDuplicateIdentifier):
         model = parseString("""

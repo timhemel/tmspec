@@ -9,7 +9,7 @@ from yldprolog.engine import to_python
 
 from .tmspec_parser import *
 from .ThreatAnalyzer import ThreatAnalyzer
-from .ThreatLibrary import ThreatLibrary
+from .threat_library import ThreatLibrary
 from .graphviz_dfd_renderer import *
 from .quickfix_reporter import QuickfixReporter
 from .json_reporter import JsonReporter

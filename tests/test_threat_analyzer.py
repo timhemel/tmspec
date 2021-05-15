@@ -6,7 +6,7 @@ from antlr4.error.ErrorListener import ErrorListener
 # from tmspec.tmspec_error import *
 from tmspec.tmspec_parser import parseString
 from tmspec.ThreatAnalyzer import ThreatAnalyzer
-from tmspec.ThreatLibrary import ThreatLibrary
+from tmspec.threat_library import ThreatLibrary
 
 from yldprolog.engine import get_value, to_python
 

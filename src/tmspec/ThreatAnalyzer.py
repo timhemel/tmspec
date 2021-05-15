@@ -4,7 +4,7 @@ import yldprolog.engine
 from yldprolog.engine import get_value, to_python, unify
 from yldprolog.engine import Atom
 
-from .ThreatLibrary import ThreatLibrary
+from .threat_library import ThreatLibrary
 
 class ThreatAnalysisResultItem:
 

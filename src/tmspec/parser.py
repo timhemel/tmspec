@@ -38,21 +38,21 @@ def _get_model(tree, filename):
     model = visitor.visit(tree)
     return model
 
-def _parseStream(inp, filename):
+def _parse_stream(inp, filename):
     tree = _get_parse_tree(inp, filename)
     model = _get_model(tree, filename)
     return model
 
-def parseFile(fn):
+def parse_file(fn):
     inp = FileStream(fn)
-    return _parseStream(inp, str(fn))
+    return _parse_stream(inp, str(fn))
 
-def parseString(data):
+def parse_string(data):
     inp = InputStream(data)
-    return _parseStream(inp, '<string>')
+    return _parse_stream(inp, '<string>')
 
-def parseStdin():
+def parse_stdin():
     inp = StdinStream()
-    return _parseStream(inp, '<stdin>')
+    return _parse_stream(inp, '<stdin>')
 
 

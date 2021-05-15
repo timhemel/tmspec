@@ -25,7 +25,7 @@ def obj_to_prolog(obj):
     return repr(s)
 
 def convert_specfile_to_prolog(infile, outf):
-    model = parseFile(infile)
+    model = parse_file(infile)
     a = ThreatAnalyzer()
     a.set_model(model)
     outf.write("%% DFD prolog code, generated from:\n")
@@ -38,7 +38,7 @@ def convert_specfile_to_prolog(infile, outf):
         outf.write("\n")
 
 def analyze_specfile(infile, threat_libraries):
-    model = parseFile(infile)
+    model = parse_file(infile)
     a = ThreatAnalyzer()
     a.set_model(model)
     for tfn in threat_libraries:
@@ -63,7 +63,7 @@ def main(verbose):
 @click.argument('infile', type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True, allow_dash=True))
 def visualize(infile):
     try:
-        model = parseFile(infile)
+        model = parse_file(infile)
         dot = GraphvizDFDRenderer(model).get_dot()
     except TmspecError as e:
         click.echo(e, err=True)

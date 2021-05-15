@@ -3,14 +3,14 @@ from tmspec.graphviz_dfd_renderer import *
 
 
 def test_component_in_zone():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(process): zone=outside, cookies;
 """)
 
 def test_complete_graph():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside;
 zone inside;
@@ -28,7 +28,7 @@ flow browse_r: user <-- browser;
     dot = GraphvizDFDRenderer(model).get_dot()
 
 def test_complete_graph_default_zone():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside: default;
 zone inside;
@@ -46,7 +46,7 @@ flow browse_r: user <-- browser;
     dot = GraphvizDFDRenderer(model).get_dot()
 
 def test_graph_nested_zones():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside: default;
 zone company;

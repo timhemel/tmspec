@@ -9,7 +9,7 @@ from tmspec.parser import *
 
 
 def test_parse():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside;
 
@@ -22,7 +22,7 @@ component webapp(process): zone=outside, cookies;
     assert model.components['webapp'].get('zone') == outside_zone
 
 def test_parse_comments():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 zone outside;
 # one line comment
@@ -37,7 +37,7 @@ component webapp(process): /* todo */ zone=outside, cookies;
 
 
 def test_parse_attribute_types():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone outside;
 
@@ -52,7 +52,7 @@ component webapp(process): zone=outside, foo='bar\'s baz', https=true, team=red,
     assert model.components['webapp'].get('zone') == outside_zone
 
 def test_parse_inherited_attributes():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone outside;
 
@@ -72,7 +72,7 @@ component webapp(tlsed,redteam): zone=outside, foo='bar\'s baz', lucky_number=13
 
 
 def test_parse_zone_attributes():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone company;
 zone office: zone=company, network=ethernet;
@@ -85,7 +85,7 @@ component webapp(process): zone=office;
 
 
 def test_parse_attribute_qstring_ends_with_backslash():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone inside;
 component webapp(process): foo='bar\'s baz\\', zone=inside;
@@ -94,7 +94,7 @@ component webapp(process): foo='bar\'s baz\\', zone=inside;
 
 
 def test_parse_attribute_qstring_with_unicode():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone inside;
 component webapp(process): foo='bar\u1234s baz', zone=inside;
@@ -102,7 +102,7 @@ component webapp(process): foo='bar\u1234s baz', zone=inside;
     assert model.components['webapp'].get('foo') == 'bar\u1234s baz'
 
 def test_parse_attribute_qstring_with_newline():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone inside;
 component webapp(process): foo='bar\ns baz', zone=inside;
@@ -110,7 +110,7 @@ component webapp(process): foo='bar\ns baz', zone=inside;
     assert model.components['webapp'].get('foo') == 'bar\ns baz'
 
 def test_zone_with_attributes():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone inside : default;
 """)
@@ -118,7 +118,7 @@ zone inside : default;
     assert zone.get('default') == True
 
 def test_element_without_attributes():
-    model = parseString(r"""
+    model = parse_string(r"""
 version 0.0;
 zone inside;
 type compinside(process): zone=inside;
@@ -133,7 +133,7 @@ flow store: webapp --> database;
 
 def test_error_on_duplicate_zone():
     with pytest.raises(TmspecErrorDuplicateIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 zone outside;
@@ -143,7 +143,7 @@ component webapp(process): zone=outside, cookies;
 
 def test_error_undefined_zone():
     with pytest.raises(TmspecErrorUnknownIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 
@@ -152,7 +152,7 @@ component webapp(process): zone=inside, cookies;
 
 def test_error_recursive_zone():
     with pytest.raises(TmspecErrorUnknownIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside: zone=outside;
 
@@ -162,7 +162,7 @@ component webapp(process): zone=inside, cookies;
 
 def test_conflicting_base_types():
     with pytest.raises(TmspecErrorConflictingTypes):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(process, datastore): zone=outside;
@@ -170,7 +170,7 @@ component webapp(process, datastore): zone=outside;
 
 def test_conflicting_derived_types():
     with pytest.raises(TmspecErrorConflictingTypes):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 zone outside;
@@ -178,7 +178,7 @@ component webapp(process, encryptedstore): zone=outside;
 """)
 
 def test_ok_derived_types():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 zone outside;
@@ -189,7 +189,7 @@ component webapp(encryptedstore, datastore): zone=outside;
 
 def test_component_identifier_already_used():
     with pytest.raises(TmspecErrorDuplicateIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component outside(process): zone=outside ;
@@ -197,7 +197,7 @@ component outside(process): zone=outside ;
 
 def test_component_type_not_a_type():
     with pytest.raises(TmspecErrorNotAType):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(process,outside): zone=outside;
@@ -205,7 +205,7 @@ component webapp(process,outside): zone=outside;
 
 def test_component_unknown_type():
     with pytest.raises(TmspecErrorUnknownIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(yabbadabbadoo): zone=outside;
@@ -213,7 +213,7 @@ component webapp(yabbadabbadoo): zone=outside;
 
 def test_flow_to_type():
     with pytest.raises(TmspecErrorInvalidType):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(process): zone=outside;
@@ -222,7 +222,7 @@ flow f1: webapp --> process;
 
 def test_flow_to_arrow():
     with pytest.raises(TmspecErrorInvalidType):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(process): zone=outside;
@@ -234,7 +234,7 @@ flow f1: webapp --> f0;
  
 def test_errors_report_file_context():
     with pytest.raises(TmspecErrorUnknownIdentifier) as exc_info:
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 zone outside;
 component webapp(yabbadabbadoo): zone=outside;
@@ -245,19 +245,19 @@ component webapp(yabbadabbadoo): zone=outside;
 
 def test_parse_error_raises_exception():
     with pytest.raises(TmspecErrorParseError):
-        model = parseString("""
+        model = parse_string("""
 yabbadabbadoo
 """)
 
 def test_lexer_error_raises_exception():
     with pytest.raises(TmspecErrorParseError):
-        model = parseString("""
+        model = parse_string("""
 *#!@#yabbadabbadoo
 """)
 
 def test_conflicting_types_in_definition():
     with pytest.raises(TmspecErrorConflictingTypes):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type encryptedstore(datastore,process): encryption;
 zone outside;
@@ -266,7 +266,7 @@ component login(encryptedstore): zone=outside ;
 
 def test_conflicting_types_with_derived_type_in_definition():
     with pytest.raises(TmspecErrorConflictingTypes):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type webapp(process);
 type encryptedstore(datastore,webapp): encryption;
@@ -275,7 +275,7 @@ component login(encryptedstore): zone=outside;
 """)
 
 def test_component_has_derived_type_attributes():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 zone outside;
@@ -284,7 +284,7 @@ component login(encryptedstore): zone=outside;
     assert model.components['login'].get('encryption') == True
 
 def test_component_derived_type_has_direct_parents_only():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 type secretstore(encryptedstore): sensitive;
@@ -295,7 +295,7 @@ component login(secretstore): zone=outside;
     assert [t.name for t in types] == ['secretstore']
 
 def test_component_type_has_multiple_direct_parents():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 type privatestore(datastore): pii;
@@ -307,7 +307,7 @@ component login(encryptedstore,privatestore): zone=outside;
 
 def test_component_cannot_be_flow():
     with pytest.raises(TmspecErrorInvalidType):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -315,7 +315,7 @@ component login(encryptedflow): zone=outside;
 """)
 
 def test_get_unzoned_components():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 component login(encryptedstore);
@@ -324,7 +324,7 @@ component login(encryptedstore);
     assert len(model.get_zone_components(None)) == 1
 
 def test_flow():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -339,7 +339,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
     assert model.flows['store_info'].target == model.components['database']
 
 def test_flow_reverse():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -354,7 +354,7 @@ flow store_info(encryptedflow): webapp <-- database, pii;
 
 def test_flow_error_duplicate_identifier():
     with pytest.raises(TmspecErrorDuplicateIdentifier):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -366,7 +366,7 @@ flow webapp(encryptedflow): webapp --> database, pii;
 
 def test_flow_must_be_type_flow():
     with pytest.raises(TmspecErrorInvalidType):
-        model = parseString("""
+        model = parse_string("""
 version 0.0;
 type encryptedstore(datastore): encryption;
 zone outside;
@@ -377,7 +377,7 @@ flow store_info(encryptedstore): webapp --> database, pii;
 """)
 
 def test_flow_has_type():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): encryption;
 zone outside;
@@ -390,7 +390,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
     assert types == ['encryptedflow']
 
 def test_derived_type_has_type():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): encryption;
 zone outside;
@@ -403,7 +403,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
     assert types == ['dataflow']
 
 def test_element_has_position():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): encryption;
 zone outside;
@@ -416,7 +416,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
     assert tmtype.position == (3, 0)
 
 def test_element_has_filename_string():
-    model = parseString("""
+    model = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): encryption;
 zone outside;
@@ -443,7 +443,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
         print(s, file=f)
         fn = f.name
     try:
-        model = parseFile(f.name)
+        model = parse_file(f.name)
     finally:
         os.unlink(f.name)
     tmtype = model.types['encryptedflow']

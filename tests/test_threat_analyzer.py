@@ -4,7 +4,7 @@ from antlr4 import *
 from antlr4.error.ErrorListener import ErrorListener
 
 # from tmspec.error import *
-from tmspec.parser import parseString
+from tmspec.parser import parse_string
 from tmspec.threat_analyzer import ThreatAnalyzer
 from tmspec.threat_library import ThreatLibrary
 
@@ -29,7 +29,7 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
         return sorted(self.model_loading_errors, key=lambda x: x.elements[0].position)
 
 
-dfd_without_flows = parseString("""
+dfd_without_flows = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https;
 zone outside;
@@ -37,7 +37,7 @@ component webapp(process): zone=outside;
 component database(datastore): zone=outside;
 """)
 
-dfd_with_flows = parseString("""
+dfd_with_flows = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https=yes;
 zone outside;
@@ -47,7 +47,7 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
 
-dfd_with_flows_and_invalid_property = parseString("""
+dfd_with_flows_and_invalid_property = parse_string("""
 version 0.0;
 type encryptedflow(dataflow): https=invalid;
 zone outside;
@@ -58,7 +58,7 @@ flow store_info(encryptedflow): webapp --> database, pii;
 """)
 
 
-dfd_nested_zones = parseString("""
+dfd_nested_zones = parse_string("""
 version 0.0;
 zone company;
 zone office: zone=company, network=ethernet;

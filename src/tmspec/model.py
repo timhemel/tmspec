@@ -15,10 +15,12 @@ class TmElementWithAttributes(TmElement):
         self.attr = attrs
         self.input_ctx = input_ctx
 
-    def get_position(self):
+    @property
+    def position(self):
         return self.input_ctx.get_position()
 
-    def get_filename(self):
+    @property
+    def filename(self):
         return self.input_ctx.get_filename()
 
     def get_attr(self, key):
@@ -69,7 +71,7 @@ class TmZone(TmElementWithAttributes):
         super(TmZone, self).__init__(name, input_ctx, [], attrs)
 
 def defined_before(e1, e2):
-    return e1.get_position() <= e2.get_position()
+    return e1.position <= e2.position
 
 class TmspecModel:
 
@@ -106,27 +108,26 @@ class TmspecModel:
         """return all types, not sorted in any particular order."""
         return self.types.values()
 
-    def add_zone(self, zone):
-        self.zones[zone.name] = zone
-        self.identifiers[zone.name] = zone
-
     def get_zones(self):
         """return all zones, sorted by their position in the spec file."""
-        return [ x[1] for x in sorted([ (z.get_position(), z) for z in self.zones.values() ]) ]
+        return [ x[1] for x in sorted([ (z.position, z) for z in self.zones.values() ]) ]
 
     def get_zone_components(self, z):
         """return all components for zone z, sorted by their position in the spec file.
         If z is None, return the unzoned components."""
         return [ x[1] for x in
-                sorted([ (v.get_position(), v)
+                sorted([ (v.position, v)
                     for c,v in self.components.items()
                     if v.get_attr('zone') == z ]) ]
 
     def get_flows(self):
         """return all data flows, sorted by their position in the spec file."""
         return [ x[1] for x in 
-            sorted([ (v.get_position(), v) for v in self.flows.values() ]) ]
+            sorted([ (v.position, v) for v in self.flows.values() ]) ]
 
+    def add_zone(self, zone):
+        self.zones[zone.name] = zone
+        self.identifiers[zone.name] = zone
 
     def add_component(self, component):
         self.components[component.name] = component

@@ -384,7 +384,7 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
     tmtype = model.types['encryptedflow']
-    assert tmtype.get_position() == (3, 0)
+    assert tmtype.position == (3, 0)
 
 def test_element_has_filename_string():
     model = parseString("""
@@ -397,7 +397,7 @@ component database(datastore): zone=outside;
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
     tmtype = model.types['encryptedflow']
-    assert tmtype.get_filename() == '<string>'
+    assert tmtype.filename == '<string>'
 
 def test_element_has_filename_file():
     s = """
@@ -418,6 +418,6 @@ flow store_info(encryptedflow): webapp --> database, pii;
     finally:
         os.unlink(f.name)
     tmtype = model.types['encryptedflow']
-    assert tmtype.get_filename() == fn
+    assert tmtype.filename == fn
 
 

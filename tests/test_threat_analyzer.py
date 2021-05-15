@@ -26,7 +26,7 @@ class FTOThreatAnalyzer(ThreatAnalyzer):
         return self.query_engine.query(name, args)
 
     def get_model_loading_errors(self):
-        return sorted(self.model_loading_errors, key=lambda x: x.elements[0].get_position())
+        return sorted(self.model_loading_errors, key=lambda x: x.elements[0].position)
 
 
 dfd_without_flows = parseString("""
@@ -388,7 +388,7 @@ def test_reporting_interface():
     threat = r.get_threats()[0]
     flow = dfd_with_flows.get_flows()[0]
     assert re.search(flow.name, threat.get_short_description())
-    assert threat.get_position() == flow.get_position()
+    assert threat.get_position() == flow.position
     assert re.search(flow.name, threat.get_long_description())
     assert threat.get_id() == 'test-002-0'
     assert threat.get_elements() == [flow]

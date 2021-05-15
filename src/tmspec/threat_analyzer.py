@@ -32,10 +32,10 @@ class ThreatAnalysisResultItem:
         return self.elements
 
     def get_filename(self):
-        return self.elements[0].get_filename()
+        return self.elements[0].filename
 
     def get_position(self):
-        return self.elements[0].get_position()
+        return self.elements[0].position
 
     def replace_template_variables(self, text):
         var_lookup = dict([('v'+str(i+1), e.name)

@@ -223,7 +223,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             self.add_clause_element(element, element_type)
 
     def add_element_properties(self, element):
-        for key, value in element.get_attributes().items():
+        for key, value in element.attributes.items():
             self.add_clause_prop(element, key, value)
 
     def add_prolog_facts_from_model(self):
@@ -233,7 +233,7 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
                 self.add_clause_subtype(tmtype, parent_type)
         for z in self.model.get_zones() + [None]:
             if z is not None:
-                for key,value in z.get_attributes().items():
+                for key,value in z.attributes.items():
                     self.add_clause_prop(z, key, value)
             for component in self.model.get_zone_components(z):
                 self.add_element_types(component)

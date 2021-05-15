@@ -18,8 +18,8 @@ component webapp(process): zone=outside, cookies;
     outside_zone = model.zones['outside']
     types = [t.name for t in model.components['webapp'].get_types()]
     assert types == ['process']
-    assert model.components['webapp'].get_attr('cookies') == True
-    assert model.components['webapp'].get_attr('zone') == outside_zone
+    assert model.components['webapp'].get('cookies') == True
+    assert model.components['webapp'].get('zone') == outside_zone
 
 def test_parse_comments():
     model = parseString("""
@@ -32,8 +32,8 @@ component webapp(process): /* todo */ zone=outside, cookies;
     outside_zone = model.zones['outside']
     types = [t.name for t in model.components['webapp'].get_types()]
     assert types == ['process']
-    assert model.components['webapp'].get_attr('cookies') == True
-    assert model.components['webapp'].get_attr('zone') == outside_zone
+    assert model.components['webapp'].get('cookies') == True
+    assert model.components['webapp'].get('zone') == outside_zone
 
 
 def test_parse_attribute_types():
@@ -44,12 +44,31 @@ zone outside;
 component webapp(process): zone=outside, foo='bar\'s baz', https=true, team=red, lucky_number=13, cookies;
 """)
     outside_zone = model.zones['outside']
-    assert model.components['webapp'].get_attr('cookies') == True
-    assert model.components['webapp'].get_attr('https') == True
-    assert model.components['webapp'].get_attr('team') == 'red'
-    assert model.components['webapp'].get_attr('lucky_number') == 13
-    assert model.components['webapp'].get_attr('foo') == 'bar\'s baz'
-    assert model.components['webapp'].get_attr('zone') == outside_zone
+    assert model.components['webapp'].get('cookies') == True
+    assert model.components['webapp'].get('https') == True
+    assert model.components['webapp'].get('team') == 'red'
+    assert model.components['webapp'].get('lucky_number') == 13
+    assert model.components['webapp'].get('foo') == 'bar\'s baz'
+    assert model.components['webapp'].get('zone') == outside_zone
+
+def test_parse_inherited_attributes():
+    model = parseString(r"""
+version 0.0;
+zone outside;
+
+type tlsed(process): https = true;
+type redteam(process): team = red;
+
+component webapp(tlsed,redteam): zone=outside, foo='bar\'s baz', lucky_number=13, cookies;
+""")
+    outside_zone = model.zones['outside']
+    assert model.components['webapp'].get('cookies') == True
+    assert model.components['webapp'].get('https') == True
+    assert model.components['webapp'].get('team') == 'red'
+    assert model.components['webapp'].get('lucky_number') == 13
+    assert model.components['webapp'].get('foo') == 'bar\'s baz'
+    assert model.components['webapp'].get('zone') == outside_zone
+
 
 
 def test_parse_zone_attributes():
@@ -61,8 +80,8 @@ zone office: zone=company, network=ethernet;
 component webapp(process): zone=office;
 """)
     company_zone = model.zones['company']
-    assert model.zones['office'].get_attr('zone') == company_zone
-    assert model.zones['office'].get_attr('network') == 'ethernet'
+    assert model.zones['office'].get('zone') == company_zone
+    assert model.zones['office'].get('network') == 'ethernet'
 
 
 def test_parse_attribute_qstring_ends_with_backslash():
@@ -71,7 +90,7 @@ version 0.0;
 zone inside;
 component webapp(process): foo='bar\'s baz\\', zone=inside;
 """)
-    assert model.components['webapp'].get_attr('foo') == 'bar\'s baz\\'
+    assert model.components['webapp'].get('foo') == 'bar\'s baz\\'
 
 
 def test_parse_attribute_qstring_with_unicode():
@@ -80,7 +99,7 @@ version 0.0;
 zone inside;
 component webapp(process): foo='bar\u1234s baz', zone=inside;
 """)
-    assert model.components['webapp'].get_attr('foo') == 'bar\u1234s baz'
+    assert model.components['webapp'].get('foo') == 'bar\u1234s baz'
 
 def test_parse_attribute_qstring_with_newline():
     model = parseString(r"""
@@ -88,7 +107,7 @@ version 0.0;
 zone inside;
 component webapp(process): foo='bar\ns baz', zone=inside;
 """)
-    assert model.components['webapp'].get_attr('foo') == 'bar\ns baz'
+    assert model.components['webapp'].get('foo') == 'bar\ns baz'
 
 def test_zone_with_attributes():
     model = parseString(r"""
@@ -96,7 +115,7 @@ version 0.0;
 zone inside : default;
 """)
     zone = model.zones['inside']
-    assert zone.get_attr('default') == True
+    assert zone.get('default') == True
 
 def test_element_without_attributes():
     model = parseString(r"""
@@ -108,9 +127,9 @@ component database(compinside);
 flow store: webapp --> database;
 """)
     zone = model.zones['inside']
-    attrs = model.identifiers['process'].get_attributes()
+    attrs = model.identifiers['process'].attributes
     attrs['zone'] = zone
-    assert model.components['database'].get_attributes() == attrs
+    assert model.components['database'].attributes == attrs
 
 def test_error_on_duplicate_zone():
     with pytest.raises(TmspecErrorDuplicateIdentifier):
@@ -211,8 +230,8 @@ zone outside;
 component webapp(yabbadabbadoo): zone=outside;
 """)
     exc = exc_info.value
-    assert exc.get_line() == 4
-    assert exc.get_column() == 17
+    assert exc.line == 4
+    assert exc.column == 17
 
 def test_parse_error_raises_exception():
     with pytest.raises(TmspecErrorParseError):
@@ -252,7 +271,7 @@ type encryptedstore(datastore): encryption;
 zone outside;
 component login(encryptedstore): zone=outside;
 """)
-    assert model.components['login'].get_attr('encryption') == True
+    assert model.components['login'].get('encryption') == True
 
 def test_component_derived_type_has_direct_parents_only():
     model = parseString("""
@@ -304,8 +323,8 @@ component database(datastore): zone=outside;
 
 flow store_info(encryptedflow): webapp --> database, pii;
 """)
-    assert model.flows['store_info'].get_attr('pii') == True
-    assert model.flows['store_info'].get_attr('https') == True
+    assert model.flows['store_info'].get('pii') == True
+    assert model.flows['store_info'].get('https') == True
     assert model.flows['store_info'].source == model.components['webapp']
     assert model.flows['store_info'].target == model.components['database']
 

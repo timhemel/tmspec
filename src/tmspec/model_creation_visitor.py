@@ -93,7 +93,7 @@ class TmspecModelVisitor(tmspecVisitor):
             attributes = {}
         component = TmComponent(component_name, component_ctx, component_types, attributes)
         #try:
-        #    component.get_attr('zone')
+        #    component['zone']
         #except KeyError:
         #    raise TmspecErrorComponentWithoutZone("no zone defined for component {}".format(component.name), ctx.attributes())
         self.model.add_component(component)

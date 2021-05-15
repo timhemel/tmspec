@@ -23,21 +23,28 @@ class TmElementWithAttributes(TmElement):
     def filename(self):
         return self._input_ctx.filename
 
-    def get_attr(self, key):
+    def __getitem__(self, key):
         try:
             return self._attrs[key]
         except KeyError:
             for p in self.parents:
                 try:
-                    return p.get_attr(key)
+                    return p[key]
                 except KeyError:
                     pass
-        return None
+        raise KeyError(key)
 
-    def get_attributes(self):
+    def get(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            return None
+
+    @property
+    def attributes(self):
         d = {}
         for p in reversed(self.parents):
-            d.update(p.get_attributes())
+            d.update(p.attributes)
         d.update(self._attrs)
         return d
 
@@ -118,7 +125,7 @@ class TmspecModel:
         return [ x[1] for x in
                 sorted([ (v.position, v)
                     for c,v in self.components.items()
-                    if v.get_attr('zone') == z ]) ]
+                    if v.get('zone') == z ]) ]
 
     def get_flows(self):
         """return all data flows, sorted by their position in the spec file."""

@@ -12,7 +12,7 @@ class GraphvizDFDRenderer:
         return g.view()
 
     def _get_graphviz_attributes(self, element):
-        gv_attrs = [(a[3:], v) for a, v in element.get_attributes().items()
+        gv_attrs = [(a[3:], v) for a, v in element.attributes.items()
                         if a.startswith('gv_') and a != 'gv_rank' ]
         return dict(gv_attrs)
 
@@ -49,7 +49,7 @@ class GraphvizDFDRenderer:
         for v in self.model.get_flows():
             edge_attrs = self._get_graphviz_attributes(v)
             try:
-                label = v.get_attr('label')
+                label = v.get('label')
             except KeyError:
                 label = None
             
@@ -61,7 +61,7 @@ class GraphvizDFDRenderer:
 
     def _render_zones_for_zone(self, graph, zone):
         for z in self.model.get_zones():
-            if z.get_attr('zone') != zone:
+            if z.get('zone') != zone:
                 continue
 
             if z is None:
@@ -76,8 +76,8 @@ class GraphvizDFDRenderer:
                 }
             else:
                 zname = z.name
-                if z.get_attr('default'):
-                    # print('default zone', z.get_attr('default'))
+                if z.get('default'):
+                    # print('default zone', z.get('default'))
                     cluster_attrs = {
                         'style': 'invis',
                     }
@@ -95,7 +95,7 @@ class GraphvizDFDRenderer:
 
                 zone_components = self.model.get_zone_components(z)
 
-                ranked_components = groupby(zone_components, key = lambda c : c.get_attr('gv_rank'))
+                ranked_components = groupby(zone_components, key = lambda c : c.get('gv_rank'))
                 for r, components in ranked_components:
                     if r is None:
                         for c in components:

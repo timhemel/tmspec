@@ -53,6 +53,12 @@ class ThreatAnalysisResultItem:
         placeholders with element names."""
         return self.replace_template_variables(self.long_description)
 
+    @classmethod
+    def from_issue(cls, issue):
+        issue_id, elements, short_desc, long_desc = issue
+        item_code = "%s-%s-%d" % tuple(issue_id)
+        item = cls(item_code, elements, short_desc, long_desc)
+        return item
 
 
 class ThreatAnalysisError(ThreatAnalysisResultItem):
@@ -257,39 +263,25 @@ report_threat(Issue, Elements, ShortDescr, LongDescr) :-
             [v_issue, v_elements, v_short_desc, v_long_desc])) for r in q]
         return r
 
-    def make_error(self, results):
-        issue_id, elements, short_desc, long_desc = results
-        error_code = "%s-%s-%d" % tuple(issue_id)
-        # message = "ERROR %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisError(error_code, elements, short_desc, long_desc)
-        return error
-
-    def make_threat(self, results):
-        issue_id, elements, short_desc, long_desc = results
-        error_code = "%s-%s-%d" % tuple(issue_id)
-        # message = "THREAT %s: %s" % (error_code, short_desc)
-        error = ThreatAnalysisThreat(error_code, elements, short_desc, long_desc)
-        return error
-
     def make_questions_from_undefined_properties(self):
-        questions = []
-        for element, prop in self.undefined_properties:
-            short_descr = "undefined property: %s" % prop
-            questions.append(ThreatAnalysisQuestion('PROPUNDEF', [element], short_descr,
-                '''The property %s is not defined on element $v1.''' % prop))
-        return questions
+        return [ ThreatAnalysisQuestion.from_issue([
+                ['internal', 'property-undefined', 0],
+                [element],
+                f'undefined_property: {prop}',
+                f'The property {prop} is not defined on element $v1.' ])
+            for element, prop in self.undefined_properties ]
 
     def make_warnings_from_invalid_properties(self):
-        warnings = []
-        for element, prop, value in self.invalid_properties:
-            short_descr = f'invalid property value for {prop}: {value}'
-            long_descr = f'The property {prop} on element $v1 has an invalid value {value}.'
-            warnings.append(ThreatAnalysisWarning('PROPINVALID', [element], short_descr, long_descr))
-        return warnings
+        return [ ThreatAnalysisWarning.from_issue([
+                ['internal', 'property-invalid', 0],
+                [element],
+                f'invalid property value for {prop}: {value}',
+                f'The property {prop} on element $v1 has an invalid value {value}.' ])
+            for element, prop, value in self.invalid_properties ]
 
     def analyze(self):
-        errors = [ self.make_error(i) for i in self.query_for_issues('error') ]
-        threats = [ self.make_threat(i) for i in self.query_for_issues('threat') ]
+        errors = [ ThreatAnalysisError.from_issue(i) for i in self.query_for_issues('error') ]
+        threats = [ ThreatAnalysisThreat.from_issue(i) for i in self.query_for_issues('threat') ]
         ar = AnalysisResult()
         ar.add_errors(self.model_loading_errors)
         ar.add_errors(errors)

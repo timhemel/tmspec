@@ -12,20 +12,20 @@ class TmElementWithAttributes(TmElement):
     def __init__(self, name, input_ctx, parents=[], attrs={}):
         super(TmElementWithAttributes, self).__init__(name)
         self.parents = parents
-        self.attr = attrs
-        self.input_ctx = input_ctx
+        self._attrs = attrs
+        self._input_ctx = input_ctx
 
     @property
     def position(self):
-        return self.input_ctx.get_position()
+        return self._input_ctx.position
 
     @property
     def filename(self):
-        return self.input_ctx.get_filename()
+        return self._input_ctx.filename
 
     def get_attr(self, key):
         try:
-            return self.attr[key]
+            return self._attrs[key]
         except KeyError:
             for p in self.parents:
                 try:
@@ -38,7 +38,7 @@ class TmElementWithAttributes(TmElement):
         d = {}
         for p in reversed(self.parents):
             d.update(p.get_attributes())
-        d.update(self.attr)
+        d.update(self._attrs)
         return d
 
     def get_types(self):

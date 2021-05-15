@@ -1,13 +1,25 @@
 
 class TmspecInputContext:
     def __init__(self, filename, line, column):
-        self.filename = filename
-        self.line = line
-        self.column = column
-    def get_position(self):
-        return self.line, self.column
-    def get_filename(self):
-        return self.filename
+        self._filename = filename
+        self._line = line
+        self._column = column
+
+    @property
+    def position(self):
+        return self._line, self._column
+
+    @property
+    def line(self):
+        return self._line
+
+    @property
+    def column(self):
+        return self._column
+
+    @property
+    def filename(self):
+        return self._filename
 
 def parse_context_to_input_context(filename, ctx):
     return TmspecInputContext(filename, ctx.start.line, ctx.start.column)
@@ -15,14 +27,18 @@ def parse_context_to_input_context(filename, ctx):
 class TmspecError(Exception):
     def __init__(self, msg, ctx):
         self.msg = msg
-        self.context = ctx
-    def get_line(self):
-        return self.context.line
-    def get_column(self):
-        return self.context.column
+        self._context = ctx
+
+    @property
+    def line(self):
+        return self._context.line
+
+    @property
+    def column(self):
+        return self._context.column
 
     def __str__(self):
-        return "%s:%d:%d:ERROR %s" % (self.context.filename, self.context.line, self.context.column, self.msg)
+        return "%s:%d:%d:ERROR %s" % (self._context.filename, self._context.line, self._context.column, self.msg)
 
 class TmspecErrorDuplicateIdentifier(TmspecError):
     pass
